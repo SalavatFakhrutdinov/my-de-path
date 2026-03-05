@@ -8,11 +8,9 @@ def main():
             normalized = normalize_name(user_input)
             print(f"Нормализованная строка: '{normalized}'")
         else:
-            print('Expected a string input is empty or spaces only')
+            print('Ожидалась строка, получены только пробелы')
     except KeyboardInterrupt:
-        print('\nProgram is finished by user')
-    except Exception as err:
-        print(f"Error occured: {err}")
+        print('\nИнициализировано завершение программы')
 
 if __name__ == "__main__":
     main()
