@@ -1,7 +1,13 @@
 from utils import normalize_name
+from logging_config import configure_logging
 
 
 def main():
+    configure_logging(
+        level="INFO",
+        log_file="main_file.log",
+        verbose=False
+    )
     try:
         user_input = input("Введите строку: ")
 
