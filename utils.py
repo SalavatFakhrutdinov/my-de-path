@@ -1,13 +1,13 @@
 import logging
-from typing import Union
 
 logger = logging.getLogger(__name__)
 
 
-def normalize_name(input_str: Union[str, any]) -> str:
+def normalize_name(input_str: str) -> str:
     if not isinstance(input_str, str):
         logger.warning(
-            f"Ожидалась строка, получено {type(input_str)}.Вернулась пустая строка"
+            f"Ожидалась строка, получено {type(input_str)}."
+            "Вернулась пустая строка"
         )
         return ""
 
