@@ -1,11 +1,18 @@
-"""
-Требования:
-* убрать пробелы по краям
-* привести к lowercase
-* заменить двойные пробелы на один
-"""
+from utils import normalize_name
 
-def normalize_name(name: str) -> str:
-    cleaned_str = " ".join(input_str.split()).lower()
+def main():
+    try:
+        user_input = input('Введите строку: ')
 
-input_str = input()
+        if user_input and user_input.strip():
+            normalized = normalize_name(user_input)
+            print(f"Нормализованная строка: '{normalized}'")
+        else:
+            print('Expected a string input is empty or spaces only')
+    except KeyboardInterrupt:
+        print('\nProgram is finished by user')
+    except Exception as err:
+        print(f"Error occured: {err}")
+
+if __name__ == "main":
+    main()
