@@ -14,5 +14,5 @@ def main():
     except Exception as err:
         print(f"Error occured: {err}")
 
-if __name__ == "main":
+if __name__ == "__main__":
     main()
