@@ -1,2 +1,5 @@
 #IDE
 venv/
+
+#cache
+__pycache__/
