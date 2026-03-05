@@ -1,5 +1,7 @@
-#folders
-venv
+# folders
+venv/
+.venv/
+env/
 
 # Python cache files
 __pycache__/
@@ -9,5 +11,5 @@ __pycache__/
 .pytest_cache/
 .ipynb_checkpoints/
 
-#logs
+# logs
 *.log
