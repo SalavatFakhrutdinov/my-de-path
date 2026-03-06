@@ -1,4 +1,4 @@
-from utils import normalize_name
+from src.utils import normalize_name
 from logging_config import configure_logging
 
 
