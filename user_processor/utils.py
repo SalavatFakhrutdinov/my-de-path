@@ -35,10 +35,22 @@ def get_names(users: List[Dict[str]]) -> List[str]:
 """
 
 
-def sort_by_age(users: List[Dict[str]], reverse: bool = False) -> List[Dict[str]]:
+def sort_by_age(
+        users: List[Dict[str]], 
+        reverse: bool = False
+) -> List[Dict[str]]:
     order = "убывания" if reverse else "возрастания"
     logger.debug(f"Сортировка {len(users)} пользователей по возрасту в порядке {order}")
+
+    valid_users = [user for user in users if "age" in user]
+    invalid_users = [user for user in users if "age" not in user]
+
+    if invalid_users:
+        logger.warning(f"Пропущено {len(invalid_users)} пользователей"
+                       "без поля 'age'")
+    
     sorted_users = sorted(users, key=lambda x: x["age"], reverse=reverse)
+
     if logger.isEnabledFor(logging.DEBUG):
         ages = [user["age"] for user in sorted_users]
         logger.debug(f"Возраста после сортировки: {ages}")
