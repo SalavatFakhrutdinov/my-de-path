@@ -14,6 +14,9 @@ DEFAULT_USERS = [
     {"id": 4, "name": "Diana", "age": 25},
 ]
 
+EXIT_SUCCESS = 0
+EXIT_INTERRUPT = 130
+
 logger = logging.getLogger(__name__)
 
 """
@@ -191,7 +194,7 @@ def main() -> NoReturn:
 
     except KeyboardInterrupt:
         logger.warning("Завершение обработки пользователем")
-        sys.exit(130)
+        sys.exit(EXIT_INTERRUPT)
 
 
 if __name__ == "__main__":
