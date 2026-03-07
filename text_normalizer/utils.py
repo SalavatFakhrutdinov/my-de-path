@@ -3,6 +3,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+"""
+Очистка от пробелов, приведение к нижнему регистру
+"""
 def normalize_name(input_str: str) -> str:
     if not isinstance(input_str, str):
         logger.warning(
