@@ -70,7 +70,7 @@ def grouped_by_age(users: List[Dict[str]]) -> Dict[int, List[Dict[str]]]:
         if age not in result:
             result[age] = []
             logger.debug(f"Создана группа для возраста {age}")
-        result(age).append(user)
+        result[age].append(user)
     logger.info(f"Создано {len(result)} групп возрастов")
     for age, group in sorted(result.items()):
         logger.debug(f"Возраст {age}: {len(group)} пользователей")
