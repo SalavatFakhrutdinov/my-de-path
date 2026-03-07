@@ -7,12 +7,11 @@ from typing import NoReturn, Dict, List
 from logging_config import configure_logging
 from utils import process_users
 
-
 DEFAULT_USERS = [
     {"id": 1, "name": "Alice", "age": 25},
     {"id": 2, "name": "Bob", "age": 17},
     {"id": 3, "name": "Charlie", "age": 32},
-    {"id": 4, "name": "Diana", "age": 25}
+    {"id": 4, "name": "Diana", "age": 25},
 ]
 
 logger = logging.getLogger(__name__)
@@ -20,6 +19,8 @@ logger = logging.getLogger(__name__)
 """
 Парсинг аргументов командной строки
 """
+
+
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Обработка данных пользователей",
@@ -30,37 +31,38 @@ def parse_arguments() -> argparse.Namespace:
     python main.py -v                  # подробный режим
     python main.py --log-file app.log   # запись логов в файл
     python main.py -v --log-file debug.log  # отладка в файл
-        """
+        """,
     )
 
     parser.add_argument(
-        '-v', '--verbose',
-        action='store_true',
-        help='Включить подробный режим (DEBUG уровень)'
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Включить подробный режим (DEBUG уровень)",
     )
 
     parser.add_argument(
-        '--log-file',
+        "--log-file", type=str, help="Путь к файлу для сохранения логов"
+    )
+
+    parser.add_argument(
+        "--input-file",
         type=str,
-        help='Путь к файлу для сохранения логов'
-    )
-
-    parser.add_argument(
-        '--input-file',
-        type=str,
-        help='Путь к JSON файлу с пользователями (если не указан, используются' \
-        'тестовые данные)'
+        help="Путь к JSON файлу с пользователями (если не указан, используются"
+        "тестовые данные)",
     )
 
 
 """
 Загрузка пользователей из JSON файла
 """
+
+
 def load_users_from_file(filepath: str) -> list:
     logger.info(f"Загрузка пользователей из файла: {filepath}")
 
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, "r", encoding="utf-8") as f:
             data = json.load(f)
             logger.info(f"Успешно загружен {len(data)} пользователей")
             return data
@@ -76,12 +78,14 @@ def load_users_from_file(filepath: str) -> list:
 Проверка корректности данных пользователей
 Вовзращает True в случае корректности данных, иначе False
 """
+
+
 def validate_users(users: List[Dict[str]]) -> bool:
     if not isinstance(users, list):
         logger.error(f"Ожидался список, получен {type(users)}")
         return False
-    
-    required_fields = {'id', 'name', 'age'}
+
+    required_fields = {"id", "name", "age"}
     valid = True
 
     for i, user in enumerate(users):
@@ -92,23 +96,28 @@ def validate_users(users: List[Dict[str]]) -> bool:
 
         missing = required_fields - user.keys()
         if missing:
-            logger.error(f"У пользователя {i} (id={user.get('id', 'unknown')})"
-                         "не хватает полей: {missing}")
+            logger.error(
+                f"У пользователя {i} (id={user.get('id', 'unknown')})"
+                "не хватает полей: {missing}"
+            )
             valid = False
 
     return valid
 
+
 """
 Форматирует результаты для вывода
 """
+
+
 def format_results(results: Dict[str]) -> str:
     if "error" in results:
         return f"\n ОШИБКА: {results['error']}"
 
     lines = []
-    lines.append("\n" + "="*60)
+    lines.append("\n" + "=" * 60)
     lines.append("РЕЗУЛЬТАТЫ ОБРАБОТКИ ПОЛЬЗОВАТЕЛЕЙ")
-    lines.append("="*60)
+    lines.append("=" * 60)
 
     for key, value in results.items():
         lines.append(f"\n{key.replace('_', ' ').title()}")
@@ -118,7 +127,9 @@ def format_results(results: Dict[str]) -> str:
                 lines.append("  • (пусто)")
             for item in value:
                 if isinstance(item, dict):
-                    lines.append(f"ID:{item.get('id', '?')} {item.get('name', '?')} ({item.get('age', '?')})")
+                    lines.append(
+                        f"ID:{item.get('id', '?')} {item.get('name', '?')} ({item.get('age', '?')})"
+                    )
                 else:
                     lines.append(f"  • {item}")
         elif isinstance(value, dict):
@@ -132,10 +143,12 @@ def format_results(results: Dict[str]) -> str:
 """
 Запуск логики приложения
 """
+
+
 def run_application(args: argparse.Namespace) -> int:
-    logger.info("="*50)
+    logger.info("=" * 50)
     logger.info("ИНИЦИАЛИЗАЦИЯ ОБРАБОТКИ ДАННЫХ ПОЛЬЗОВАТЕЛЕЙ")
-    logger.info("="*50)
+    logger.info("=" * 50)
 
     users = None
 
@@ -152,7 +165,7 @@ def run_application(args: argparse.Namespace) -> int:
 
     if not validate_users(users):
         return 1
-    
+
     logger.info("Старт блока обработки данных")
     results = process_users(users)
 
@@ -169,13 +182,13 @@ def main() -> NoReturn:
     configure_logging(
         level="DEBUG" if args.verbose else "INFO",
         log_file=args.log_file,
-        verbose=args.verbose
+        verbose=args.verbose,
     )
 
     try:
         exit_code = run_application(args)
         sys.exit(exit_code)
-        
+
     except KeyboardInterrupt:
         logger.warning("Завершение обработки пользователем")
         sys.exit(130)
