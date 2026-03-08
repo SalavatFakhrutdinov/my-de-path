@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 """
 Парсинг аргументов командной строки
 """
+
+
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Обработка данных пользователей",
@@ -49,6 +51,8 @@ def parse_arguments() -> argparse.Namespace:
 """
 Загрузка пользователей из JSON файла
 """
+
+
 def load_users_from_file(filepath: str) -> list:
     logger.info(f"Загрузка пользователей из файла: {filepath}")
 
@@ -69,6 +73,8 @@ def load_users_from_file(filepath: str) -> list:
 Проверка корректности данных пользователей
 Вовзращает True в случае корректности данных, иначе False
 """
+
+
 def validate_users(users: List[Dict[str]]) -> bool:
     if not isinstance(users, list):
         logger.error(f"Ожидался список, получен {type(users)}")
@@ -97,6 +103,8 @@ def validate_users(users: List[Dict[str]]) -> bool:
 """
 Форматирует результаты для вывода
 """
+
+
 def format_results(results: Dict[str]) -> str:
     if "error" in results:
         return f"\n ОШИБКА: {results['error']}"
@@ -130,6 +138,8 @@ def format_results(results: Dict[str]) -> str:
 """
 Запуск логики приложения
 """
+
+
 def run_application(args: argparse.Namespace) -> int:
     logger.info("=" * 50)
     logger.info("ИНИЦИАЛИЗАЦИЯ ОБРАБОТКИ ДАННЫХ ПОЛЬЗОВАТЕЛЕЙ")

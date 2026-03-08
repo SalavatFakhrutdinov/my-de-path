@@ -7,6 +7,8 @@ logger = logging.getLogger(__name__)
 """
 Фильтр пользователей по возрасту (старше 18 лет)
 """
+
+
 def get_adult_users(users: List[Dict[str]]) -> List[Dict[str]]:
     logger.debug(f"Фильтрация взрослых из {len(users)} пользователей")
     adults = [user for user in users if user["age"] >= ADULT_AGE]
@@ -17,6 +19,8 @@ def get_adult_users(users: List[Dict[str]]) -> List[Dict[str]]:
 """
 Вовзращает список имен
 """
+
+
 def get_names(users: List[Dict[str]]) -> List[str]:
     logger.debug("Извлечение списка имен")
     names = [user["name"] for user in users]
@@ -27,10 +31,9 @@ def get_names(users: List[Dict[str]]) -> List[str]:
 """
 Сортирует пользователей по возрасту
 """
-def sort_by_age(
-        users: List[Dict[str]], 
-        reverse: bool = False
-) -> List[Dict[str]]:
+
+
+def sort_by_age(users: List[Dict[str]], reverse: bool = False) -> List[Dict[str]]:
     order = "убывания" if reverse else "возрастания"
     logger.debug(f"Сортировка {len(users)} пользователей по возрасту в порядке {order}")
 
@@ -38,9 +41,8 @@ def sort_by_age(
     invalid_users = [user for user in users if "age" not in user]
 
     if invalid_users:
-        logger.warning(f"Пропущено {len(invalid_users)} пользователей"
-                       "без поля 'age'")
-    
+        logger.warning(f"Пропущено {len(invalid_users)} пользователей" "без поля 'age'")
+
     sorted_users = sorted(users, key=lambda x: x["age"], reverse=reverse)
 
     if logger.isEnabledFor(logging.DEBUG):
@@ -52,6 +54,8 @@ def sort_by_age(
 """
 Построить словарь типа {id: name}
 """
+
+
 def build_dict(users: List[Dict[str]]) -> Dict[int, str]:
     logger.debug(f"Построение словаря id: name для {len(users)} пользователей")
     users_dict = {user["id"]: user["name"] for user in users}
@@ -62,6 +66,8 @@ def build_dict(users: List[Dict[str]]) -> Dict[int, str]:
 """
 Получает множество уникальных возрастов
 """
+
+
 def get_unique_ages(users: List[Dict[str]]) -> Set[int]:
     logger.debug("Получение уникального множества возрастов")
     unique_ages = {user["age"] for user in users}
@@ -75,6 +81,8 @@ def get_unique_ages(users: List[Dict[str]]) -> Set[int]:
 """
 Группирует пользователей по возрасту
 """
+
+
 def grouped_by_age(users: List[Dict[str]]) -> Dict[int, List[Dict[str]]]:
     logger.debug(f"Группировка {len(users)} пользователей по возрасту")
     result = {}
@@ -94,6 +102,8 @@ def grouped_by_age(users: List[Dict[str]]) -> Dict[int, List[Dict[str]]]:
 """
 Применение всех функций обработки
 """
+
+
 def process_users(users: List[Dict[str]]) -> Dict[str]:
     logger.info("Инициализация процесса обработки пользователей")
 
