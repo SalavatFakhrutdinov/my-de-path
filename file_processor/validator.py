@@ -15,29 +15,25 @@ def validate_user(user: Dict[str, Any]) -> Tuple[bool, List[str]]:
         errors.append(f"Пропущены поля: {missing}")
         return False, errors
     
-    try:
-        user_id = user['id']
-        if not isinstance(user_id, (int, float)) or isinstance(user_id, bool):
-            errors.append(f"Поле id должен быть числового типа,"
-                          "получен тип {type(name).__name__}")
-        
-        name = user['name']
-        if not isinstance(name, str):
-            errors.append(f"Поле name должно быть строкового типа,"
-                          "получен тип {type(name).__name__}")
-        elif not name.strip():
-            errors.append("Поле name не может быть пустым")
-
-        age = user['age']
-        if not isinstance(age, (int, float)) or isinstance(age, bool):
-            errors.append(f"Поле age должно быть числовым, получен"
-                          "тип {type(age).__name__}")
-        elif age < MIN_AGE or age > MAX_AGE:
-            errors.append(f"Поле age должно быть в диапазоне между"
-                          "{MIN_AGE} и {MAX_AGE}, получено значение {age}")
+    user_id = user['id']
+    if not isinstance(user_id, (int, float)) or isinstance(user_id, bool):
+        errors.append(f"Поле id должен быть числового типа,"
+                        "получен тип {type(name).__name__}")
     
-    except Exception as e:
-        errors.append(f"Ошибка валидации: {e}")
+    name = user['name']
+    if not isinstance(name, str):
+        errors.append(f"Поле name должно быть строкового типа,"
+                        "получен тип {type(name).__name__}")
+    elif not name.strip():
+        errors.append("Поле name не может быть пустым")
+
+    age = user['age']
+    if not isinstance(age, (int, float)) or isinstance(age, bool):
+        errors.append(f"Поле age должно быть числовым, получен"
+                        "тип {type(age).__name__}")
+    elif age < MIN_AGE or age > MAX_AGE:
+        errors.append(f"Поле age должно быть в диапазоне между"
+                        "{MIN_AGE} и {MAX_AGE}, получено значение {age}")
     
     return len(errors) == 0, errors
 
