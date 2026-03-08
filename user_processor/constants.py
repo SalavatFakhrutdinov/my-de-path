@@ -1,0 +1,4 @@
+# КОНСТАНТЫ
+ADULT_AGE = 18
+EXIT_SUCCESS = 0
+EXIT_INTERRUPT = 130

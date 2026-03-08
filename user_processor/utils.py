@@ -1,16 +1,12 @@
 from typing import List, Dict, Set
 import logging
+from constants import ADULT_AGE
 
 logger = logging.getLogger(__name__)
-
-# КОНСТАНТЫ
-ADULT_AGE = 18
 
 """
 Фильтр пользователей по возрасту (старше 18 лет)
 """
-
-
 def get_adult_users(users: List[Dict[str]]) -> List[Dict[str]]:
     logger.debug(f"Фильтрация взрослых из {len(users)} пользователей")
     adults = [user for user in users if user["age"] >= ADULT_AGE]

@@ -3,6 +3,7 @@ import sys
 import logging
 import json
 from typing import NoReturn, Dict, List
+from constants import EXIT_INTERRUPT, EXIT_SUCCESS
 
 from logging_config import configure_logging
 from utils import process_users
@@ -13,9 +14,6 @@ DEFAULT_USERS = [
     {"id": 3, "name": "Charlie", "age": 32},
     {"id": 4, "name": "Diana", "age": 25},
 ]
-
-EXIT_SUCCESS = 0
-EXIT_INTERRUPT = 130
 
 logger = logging.getLogger(__name__)
 
