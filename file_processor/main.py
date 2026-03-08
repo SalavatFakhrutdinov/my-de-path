@@ -112,7 +112,7 @@ def print_summary(stats: dict, output_file: str) -> None:
 """
 
 
-def run_apllication(args: argparse.Namespace) -> int:
+def run_application(args: argparse.Namespace) -> int:
     logger.info("=" * 50)
     logger.info("ЗАПУСК ОБРАБОТКИ ПОЛЬЗОВАТЕЛЕЙ")
     logger.info("=" * 50)
@@ -152,7 +152,7 @@ def main() -> NoReturn:
     args = parse_arguments()
 
     try:
-        exit_code = run_apllication(args)
+        exit_code = run_application(args)
         sys.exit(exit_code)
 
     except KeyboardInterrupt:
