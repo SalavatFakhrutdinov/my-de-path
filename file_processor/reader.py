@@ -6,6 +6,32 @@ logger = logging.getLogger(__name__)
 
 
 """
+Чтение JSON файла и возврат списка пользователей
+"""
+def read_json(filepath: str) -> Optional[List[Dict[str, Any]]]:
+    logger.info(f"Чтение JSON файла: {filepath}")
+
+    try:
+        with open(filepath, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+
+        if not isinstance(data, list):
+            logger.error(f"Ожидался JSON массив," 
+                         f"получен тип {type(data).__name__}")
+            return None
+        
+        logger.info(f"Успешно загружено {len(data)} строк")
+        return data
+    
+    except FileNotFoundError:
+        logger.error(f"Файл не найден: {filepath}")
+        return None
+    except json.JSONDecodeError as e:
+        logger.error(f"Невалидный JSON в {filepath}: {e}")
+        return None
+
+
+"""
 Потоковое чтение JSON файла и возврат объектов построчно
 """
 def read_json_streaming(filepath: str) -> Iterator[Dict[str, Any]]:
