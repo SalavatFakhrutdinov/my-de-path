@@ -17,8 +17,6 @@ def get_adult_users(users: List[Dict[str]]) -> List[Dict[str]]:
 """
 Вовзращает список имен
 """
-
-
 def get_names(users: List[Dict[str]]) -> List[str]:
     logger.debug("Извлечение списка имен")
     names = [user["name"] for user in users]
@@ -29,8 +27,6 @@ def get_names(users: List[Dict[str]]) -> List[str]:
 """
 Сортирует пользователей по возрасту
 """
-
-
 def sort_by_age(
         users: List[Dict[str]], 
         reverse: bool = False
@@ -56,8 +52,6 @@ def sort_by_age(
 """
 Построить словарь типа {id: name}
 """
-
-
 def build_dict(users: List[Dict[str]]) -> Dict[int, str]:
     logger.debug(f"Построение словаря id: name для {len(users)} пользователей")
     users_dict = {user["id"]: user["name"] for user in users}
@@ -68,8 +62,6 @@ def build_dict(users: List[Dict[str]]) -> Dict[int, str]:
 """
 Получает множество уникальных возрастов
 """
-
-
 def get_unique_ages(users: List[Dict[str]]) -> Set[int]:
     logger.debug("Получение уникального множества возрастов")
     unique_ages = {user["age"] for user in users}
@@ -83,8 +75,6 @@ def get_unique_ages(users: List[Dict[str]]) -> Set[int]:
 """
 Группирует пользователей по возрасту
 """
-
-
 def grouped_by_age(users: List[Dict[str]]) -> Dict[int, List[Dict[str]]]:
     logger.debug(f"Группировка {len(users)} пользователей по возрасту")
     result = {}
@@ -104,8 +94,6 @@ def grouped_by_age(users: List[Dict[str]]) -> Dict[int, List[Dict[str]]]:
 """
 Применение всех функций обработки
 """
-
-
 def process_users(users: List[Dict[str]]) -> Dict[str]:
     logger.info("Инициализация процесса обработки пользователей")
 
