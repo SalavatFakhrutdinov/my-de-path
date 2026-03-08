@@ -11,15 +11,21 @@ logger = logging.getLogger(__name__)
 
 
 def write_csv(
-    data: List[Dict[str, Any]], filepath: str, fields: Optional[List[str]] = None
+    data: List[Dict[str, Any]],
+    filepath: str,
+    fields: Optional[List[str]] = None,
+    allow_empty: bool = True,
 ) -> bool:
 
-    if not data:
-        logger.warning("Нет данных для записи")
+    if not data and not allow_empty:
+        logger.warning("Нет данных для записи и allow_empty=False")
         return False
 
-    if fields is None:
+    if fields is None and data:
         fields = list(data[0].keys())
+    elif fields is None:
+        logger.error("Невозможно прочитать CSV: нет данных и нет определенных полей")
+        return False
 
     logger.info(f"Запись {len(data)} записей в {filepath}")
     logger.debug(f"Поля: {fields}")
@@ -28,9 +34,10 @@ def write_csv(
         with open(filepath, "w", encoding="utf-8", newline="") as file:
             writer = csv.DictWriter(file, fieldnames=fields)
             writer.writeheader()
-            writer.writerows(data)
+            if data:
+                writer.writerows(data)
 
-        logger.info(f"Успешно записаны строки в количестве {len(data)}" f"в {filepath}")
+        logger.info(f"Успешно записаны строки в количестве {len(data)} в {filepath}")
         return True
 
     except PermissionError:
