@@ -4,16 +4,10 @@ import logging
 import json
 from typing import NoReturn, Dict, List
 from constants import EXIT_INTERRUPT, EXIT_SUCCESS
+from default_users import DEFAULT_USERS
 
 from logging_config import configure_logging
 from utils import process_users
-
-DEFAULT_USERS = [
-    {"id": 1, "name": "Alice", "age": 25},
-    {"id": 2, "name": "Bob", "age": 17},
-    {"id": 3, "name": "Charlie", "age": 32},
-    {"id": 4, "name": "Diana", "age": 25},
-]
 
 logger = logging.getLogger(__name__)
 
