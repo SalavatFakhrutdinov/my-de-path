@@ -1,5 +1,5 @@
 import logging
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple, Optional
 from constants import *
 
 logger = logging.getLogger(__name__)
@@ -10,69 +10,48 @@ logger = logging.getLogger(__name__)
 """
 
 
-def validate_user(user: Dict[str, Any]) -> Tuple[bool, List[str]]:
+def validate_user(user: Dict[str, Any], line_num: Optional[int] = None) -> Tuple[bool, List[str]]:
     errors = []
-    missing = REQUIRED_FIELDS - user.keys()
-    if missing:
-        errors.append(f"Пропущены поля: {missing}")
+    location = f"в строке {line_num}" if line_num else ""
+
+    if not isinstance(user, dict):
+        errors.append(
+            f"Пользователь {location} не входит в словарь: {type(user).__name__}"
+        )
         return False, errors
 
-    user_id = user["id"]
-    if not isinstance(user_id, (int, float)) or isinstance(user_id, bool):
-        errors.append(
-            f"Поле id должен быть числового типа, получен тип {type(name).__name__}"
-        )
+    missing = REQUIRED_FIELDS - user.keys()
+    if missing:
+        errors.append(f"У пользователя {location} пропущены поля: {missing}")
+        return False, errors
 
-    name = user["name"]
-    if not isinstance(name, str):
-        errors.append(
-            f"Поле name должно быть строкового типа, получен тип {type(name).__name__}"
-        )
-    elif not name.strip():
-        errors.append("Поле name не может быть пустым")
+    try:
+        user_id = user["id"]
+        if not isinstance(usser_id, (int, float)) or isinstance(user_id, bool):
+            errors.append(f"Пользователь {location}: поле id должно быть числовым, получен {type(user_id).__name__} тип")
+        
+        name = user["name"]
+        if not isinstance(name, str):
+            errors.append(
+                f"Пользователь {location}: поле name должно быть строкового типа, получен тип {type(name).__name__}"
+            )
+        elif not name.strip():
+            errors.append(f"Пользователь {location}: поле name не может быть пустым")
 
-    age = user["age"]
-    if not isinstance(age, (int, float)) or isinstance(age, bool):
-        errors.append(
-            f"Поле age должно быть числовым, получен тип {type(age).__name__}"
-        )
-    elif age < MIN_AGE or age > MAX_AGE:
-        errors.append(
-            f"Поле age должно быть в диапазоне между {MIN_AGE} и {MAX_AGE}, получено значение {age}"
-        )
+        age = user["age"]
+        if not isinstance(age, (int, float)) or isinstance(age, bool):
+            errors.append(
+                f"Пользователь {location}: поле age должно быть числовым, получен тип {type(age).__name__}"
+            )
+        elif age < MIN_AGE or age > MAX_AGE:
+            errors.append(
+                f"Пользователь {location}: поле age должно быть в диапазоне между {MIN_AGE} и {MAX_AGE}, получено значение {age}"
+            )
+
+    except Exception as e:
+        errors.append(f"Пользователь {location}: ошибка валидации: {e}")
 
     return len(errors) == 0, errors
-
-
-"""
-Проверка списка пользователей
-"""
-
-
-def validate_users(
-    users: List[Dict[str, Any]],
-) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
-
-    logger.info(f"Проверка {len(users)} пользователей")
-
-    valid_users = []
-    invalid_users = []
-
-    for idx, user in enumerate(users):
-        is_valid, errors = validate_user(user)
-
-        if is_valid:
-            valid_users.append(user)
-        else:
-            invalid_entry = {"index": idx, "user": user, "errors": errors}
-            invalid_users.append(invalid_entry)
-            logger.warning(f"Невалидный пользователь по индексу {idx}: {errors}")
-
-    logger.info(
-        f"Валидация заверщена: {len(valid_users)} валидных, невалидных: {len(invalid_users)}"
-    )
-
-    return valid_users, invalid_users
 
 
 """
@@ -106,7 +85,7 @@ def sort_by_age(
     sorted_users = sorted(users, key=lambda x: x["age"], reverse=reverse)
 
     if logger.isEnabledFor(logging.DEBUG):
-        ages = [user["age"] for user in sorted_users]
+        ages = [user["age"] for user in sorted_users[:5]]
         logger.debug(f"Возраста после сортировки: {ages}")
 
     return sorted_users
