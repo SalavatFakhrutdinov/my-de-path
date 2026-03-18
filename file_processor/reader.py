@@ -1,39 +1,69 @@
 import json
 import logging
+import time
 from typing import List, Dict, Any, Optional, Iterator
+from functools import wraps
 
 logger = logging.getLogger(__name__)
 
-
-"""
-Чтение JSON файла и возврат списка пользователей
-"""
-
-
-def read_json(filepath: str) -> Optional[List[Dict[str, Any]]]:
-    logger.info(f"Чтение JSON файла: {filepath}")
-
-    try:
-        with open(filepath, "r", encoding="utf-8") as file:
-            data = json.load(file)
-
-        if not isinstance(data, list):
-            logger.error(f"Ожидался JSON массив," f"получен тип {type(data).__name__}")
-            return None
-
-        logger.info(f"Успешно загружено {len(data)} строк")
-        return data
-
-    except FileNotFoundError:
-        logger.error(f"Файл не найден: {filepath}")
-        return None
-    except json.JSONDecodeError as e:
-        logger.error(f"Невалидный JSON в {filepath}: {e}")
-        return None
+RETRYABLE_EXCEPTIONS = (
+    FileNotFoundError,
+    PermissionError,
+    ConnectionError,
+    TimeoutError,
+    OSError
+)
 
 
 """
-Потоковое чтение JSON файла и возврат объектов построчно
+Декоратор для повторных попыток при временных ошибках
+"""
+
+
+def retry(max_attempts: int = 3, delay: float = 1.0, backoff: float = 2.0):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            last_exception = None
+            current_delay = delay
+
+            for attempt in range(1, max_attempts + 1):
+                try:
+                    return func(*args, **kwargs)
+                except RETRYABLE_EXCEPTIONS as e:
+                    last_exception = e
+                    if attempt == max_attempts:
+                        logger.error(f"Ошибка после {max_attempts} попыток: {e}")
+                        raise
+
+                    logger.warning(
+                        f"Попытка {attempt}/{max_attempts} не удалась: {e}. "
+                        f"Повтор через {current_delay:.1f}сек..."
+                    )
+                    time.sleep(current_delay)
+                    current_delay *= backoff
+                except Exception as e:
+                    logger.error(f"Ошибка, не подлежащая retry: {e}")
+                    raise
+            
+            raise last_exception or RuntimeError("Неожиданный выход попытки retry")
+        
+        return wrapper
+    return decorator
+
+
+"""
+Открытие файла с поддержкой retry
+"""
+
+
+@retry(max_attempts=3, delay=1.0)
+def _open_file_with_retry(filepath: str):
+    return open(filepath, 'r', encoding='utf-8')
+
+
+"""
+Потоковое чтение JSON файла с поддержкой retry при открытии
 """
 
 
@@ -41,7 +71,7 @@ def read_json_streaming(filepath: str) -> Iterator[Dict[str, Any]]:
     logger.info(f"Потоковое чтение JSON файла {filepath}")
 
     try:
-        with open(filepath, "r", encoding="utf-8") as file:
+        with _open_file_with_retry(filepath) as file:
             first_char = file.read(1)
             file.seek(0)
 
@@ -52,13 +82,19 @@ def read_json_streaming(filepath: str) -> Iterator[Dict[str, Any]]:
                 logger.debug("Обнаружен формат JSON строковый")
                 yield from _read_jsonl_streaming(file)
 
-    except FileNotFoundError:
-        logger.error(f"Файл не найден: {filepath}")
-        return
+    except RETRYABLE_EXCEPTIONS as e:
+        logger.error(f"Ошибка открытия файла после попыток: {e}")
+        raise
+    except json.JSONDecodeError as e:
+        logger.error(f"Ошибка парсинга JSON: {e}")
+        raise
+    except Exception as e:
+        logger.exception(f"Неожиданная ошибка чтения {filepath}")
+        raise
 
 
 """
-Чтение формата JSON lines
+Чтение формата JSON lines с нумерацией строк для логирования
 """
 
 
@@ -67,17 +103,15 @@ def _read_jsonl_streaming(file_obj) -> Iterator[Dict[str, Any]]:
         line = line.strip()
         if not line:
             continue
-
         try:
-            data = json.loads(line)
-            yield data
+            yield json.loads(line)
         except json.JSONDecodeError as e:
-            logger.error(f"Ошибка JSON на строке {line_num}: {e}")
-            continue
+            logger.error(f"Ошибка парсинга JSON на строке {line_num}: {e}")
+            raise
 
 
 """
-Потоковое чтение JSON массива
+Потоковое чтение JSON массива с отслеживанием позиции
 """
 
 
@@ -88,7 +122,7 @@ def _read_json_array_streaming(file_obj) -> Iterator[Dict[str, Any]]:
     in_string = False
     escape = False
     depth = 1
-    object_start = None
+    object_count = 0
 
     while True:
         char = file_obj.read(1)
@@ -111,22 +145,18 @@ def _read_json_array_streaming(file_obj) -> Iterator[Dict[str, Any]]:
             continue
 
         if char == "{":
-            if depth == 1:
-                object_start = len(buffer)
             depth += 1
             buffer += char
         elif char == "}":
             depth -= 1
             buffer += char
             if depth == 1:
+                object_count += 1
                 try:
-                    obj_str = buffer[object_start:]
-                    obj = json.loads(obj_str)
-                    yield obj
+                    yield json.loads(buffer)
                     buffer = ""
-                    object_start = None
                 except json.JSONDecodeError as e:
-                    logger.error(f"Ошибка парсинга объекта: {e}")
+                    logger.error(f"Ошибка парсинга объекта #{object_count}: {e}")
         elif char == "," and depth == 1:
             continue
         else:
