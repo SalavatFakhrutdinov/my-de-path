@@ -11,7 +11,7 @@ RETRYABLE_EXCEPTIONS = (
     PermissionError,
     ConnectionError,
     TimeoutError,
-    OSError
+    OSError,
 )
 
 
@@ -45,10 +45,11 @@ def retry(max_attempts: int = 3, delay: float = 1.0, backoff: float = 2.0):
                 except Exception as e:
                     logger.error(f"Ошибка, не подлежащая retry: {e}")
                     raise
-            
+
             raise last_exception or RuntimeError("Неожиданный выход попытки retry")
-        
+
         return wrapper
+
     return decorator
 
 
@@ -59,7 +60,7 @@ def retry(max_attempts: int = 3, delay: float = 1.0, backoff: float = 2.0):
 
 @retry(max_attempts=3, delay=1.0)
 def _open_file_with_retry(filepath: str):
-    return open(filepath, 'r', encoding='utf-8')
+    return open(filepath, "r", encoding="utf-8")
 
 
 """

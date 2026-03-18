@@ -10,7 +10,9 @@ logger = logging.getLogger(__name__)
 """
 
 
-def validate_user(user: Dict[str, Any], line_num: Optional[int] = None) -> Tuple[bool, List[str]]:
+def validate_user(
+    user: Dict[str, Any], line_num: Optional[int] = None
+) -> Tuple[bool, List[str]]:
     errors = []
     location = f"в строке {line_num}" if line_num else ""
 
@@ -28,8 +30,10 @@ def validate_user(user: Dict[str, Any], line_num: Optional[int] = None) -> Tuple
     try:
         user_id = user["id"]
         if not isinstance(user_id, (int, float)) or isinstance(user_id, bool):
-            errors.append(f"Пользователь {location}: поле id должно быть числовым, получен {type(user_id).__name__} тип")
-        
+            errors.append(
+                f"Пользователь {location}: поле id должно быть числовым, получен {type(user_id).__name__} тип"
+            )
+
         name = user["name"]
         if not isinstance(name, str):
             errors.append(

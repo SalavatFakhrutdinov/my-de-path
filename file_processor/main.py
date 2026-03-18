@@ -59,6 +59,7 @@ def parse_arguments() -> argparse.Namespace:
 Статистика пайплайна в логи (INFO уровень)
 """
 
+
 def print_pipeline_stats(stats: dict) -> None:
     logger.info("=" * 50)
     logger.info("СТАТИСТИКА ПАЙПЛАЙНА")
@@ -84,51 +85,50 @@ def run_application(args: argparse.Namespace) -> int:
     logger.info(f"Минимальный возраст: {args.min_age}")
 
     stats = {
-        'records_read': 0,
-        'valid_records': 0,
-        'invalid_records': 0,
-        'written_records': 0
+        "records_read": 0,
+        "valid_records": 0,
+        "invalid_records": 0,
+        "written_records": 0,
     }
 
     valid_users: List[Dict[str, Any]] = []
 
     try:
         for line_num, user in enumerate(read_json_streaming(args.input, 1)):
-            stats['records_read'] += 1
+            stats["records_read"] += 1
 
             is_valid, errors = validate_user(user, line_num)
 
             if is_valid:
-                stats['valid_records'] += 1
+                stats["valid_records"] += 1
 
                 transformed = apply_transformations(user)
 
-                if transformed['age'] >= args.min_age:
+                if transformed["age"] >= args.min_age:
                     valid_users.append(transformed)
             else:
-                stats['invalid_records'] += 1
-                logger.warning(f"Пропуск невалидной записи в строке {line_num}: {errors}")
+                stats["invalid_records"] += 1
+                logger.warning(
+                    f"Пропуск невалидной записи в строке {line_num}: {errors}"
+                )
 
         valid_users = sort_by_age(valid_users)
-        stats['written_records'] = len(valid_users)
+        stats["written_records"] = len(valid_users)
 
         logger.info(f"Запись {len(valid_users)} строк в {args.output}")
         success = write_csv(
-            valid_users,
-            args.output,
-            fields=['id', 'name', 'age'],
-            allow_empty=True
+            valid_users, args.output, fields=["id", "name", "age"], allow_empty=True
         )
 
         if not success:
             logger.error("Ошибка записи в итоговый файл")
             return EXIT_FAILURE
-        
+
         print_pipeline_stats(stats)
 
         if valid_users and logger.isEnabledFor(logging.DEBUG):
             logger.debug(f"Пример трансформированного пользователя: {valid_users[0]}")
-            if 'age_group' in valid_users[0]:
+            if "age_group" in valid_users[0]:
                 logger.debug(f"Возрастные группы добавлены")
 
     except KeyboardInterrupt:
@@ -139,7 +139,7 @@ def run_application(args: argparse.Namespace) -> int:
     except RETRYABLE_EXCEPTIONS as e:
         logger.error(f"Ошибка чтения входного файла после всех попыток: {e}")
         return EXIT_FAILURE
-    
+
     except json.JSONDecodeError as e:
         logger.error(f"Ошибка парсинга JSON-файла: {e}")
 
@@ -154,7 +154,7 @@ def main() -> NoReturn:
     configure_logging(
         level="DEBUG" if args.verbose else "INFO",
         log_file=args.log_file,
-        verbose=args.verbose
+        verbose=args.verbose,
     )
 
     try:
