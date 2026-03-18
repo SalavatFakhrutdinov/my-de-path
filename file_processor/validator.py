@@ -27,7 +27,7 @@ def validate_user(user: Dict[str, Any], line_num: Optional[int] = None) -> Tuple
 
     try:
         user_id = user["id"]
-        if not isinstance(usser_id, (int, float)) or isinstance(user_id, bool):
+        if not isinstance(user_id, (int, float)) or isinstance(user_id, bool):
             errors.append(f"Пользователь {location}: поле id должно быть числовым, получен {type(user_id).__name__} тип")
         
         name = user["name"]
