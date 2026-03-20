@@ -9,12 +9,18 @@ import sys
 import json
 from typing import NoReturn, List, Dict, Any
 
-from src.file_processor.logging_config import configure_logging
-from reader import read_json_streaming, RETRYABLE_EXCEPTIONS
-from validator import validate_user, filter_adults, sort_by_age
-from transformations import apply_transformations
-from writer import write_csv
-from constants import *
+from file_processor.logging_config import configure_logging
+from file_processor.reader import read_json_streaming, RETRYABLE_EXCEPTIONS
+from file_processor.validator import validate_user, filter_adults, sort_by_age
+from file_processor.transformations import apply_transformations
+from file_processor.writer import write_csv
+from file_processor.constants import (
+    DEFAULT_MIN_AGE,
+    EXIT_SUCCESS,
+    EXIT_FAILURE,
+    EXIT_INTERRUPT,
+)
+from file_processor.retry import RETRYABLE_EXCEPTIONS
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +54,10 @@ def parse_arguments() -> argparse.Namespace:
         default=DEFAULT_MIN_AGE,
         help=f"Минимальный возраст для фильтрации:"
         f"(по умолчанию: {DEFAULT_MIN_AGE})",
+    )
+
+    parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Включить подробный режим"
     )
 
     parser.add_argument("--log-file", help="Путь к файлу лога")
