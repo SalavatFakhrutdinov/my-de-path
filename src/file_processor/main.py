@@ -10,6 +10,7 @@ import json
 from typing import NoReturn, List, Dict, Any
 
 from file_processor.logging_config import configure_logging
+from file_processor.config import load_config
 from file_processor.reader import read_json_streaming, RETRYABLE_EXCEPTIONS
 from file_processor.validator import validate_user, filter_adults, sort_by_age
 from file_processor.transformations import apply_transformations
@@ -43,21 +44,31 @@ def parse_arguments() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        "--input", "-i", required=True, help="Введите путь к JSON файлу"
+        "--input", "-i", help="Введите путь к JSON файлу"
     )
 
-    parser.add_argument("--output", "-o", required=True, help="Вывод пути CSV файла")
+    parser.add_argument("--output", "-o", help="Вывод пути CSV файла")
 
     parser.add_argument(
         "--min-age",
         type=int,
-        default=DEFAULT_MIN_AGE,
         help=f"Минимальный возраст для фильтрации:"
-        f"(по умолчанию: {DEFAULT_MIN_AGE})",
+        f"(переопределяет config)",
     )
 
     parser.add_argument(
-        "--verbose", "-v", action="store_true", help="Включить подробный режим"
+        "--config", "-c", help="Путь к YAML файлу конфигурации"
+    )
+
+    parser.add_argument(
+        "--env",
+        choices=["development", "production", "testing"],
+        default="development",
+        help="Окружение (по умолчанию: development)"
+    )
+
+    parser.add_argument(
+        "--verbose", "-v", help="Включить подробный режим"
     )
 
     parser.add_argument("--log-file", help="Путь к файлу лога")
