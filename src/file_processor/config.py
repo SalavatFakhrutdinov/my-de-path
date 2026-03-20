@@ -16,6 +16,7 @@ class Config:
     """
     Инициализация конфигурации
     """
+
     def __init__(self, config_path: Optional[Path] = None, env: Optional[str] = None):
         self.env = env or os.getenv("APP_ENV", "development")
         self.config_path = config_path or self._get_default_config_path()
@@ -24,14 +25,16 @@ class Config:
     """
     Возвращает путь к конфигурационному файлу по умолчанию
     """
+
     def _get_default_config_path(self) -> Path:
         current_dir = Path(__file__).parent
         project_root = current_dir.parent.parent
         return project_root / "configs" / "config.yaml"
-    
+
     """
     Загружает конфигурацию из YAML файла
     """
+
     def _load_config(self) -> Dict[str, Any]:
         try:
             with open(self.config_path, "r", encoding="utf-8") as file:
@@ -41,36 +44,38 @@ class Config:
 
             logger.info(f"Загружена конфигурация для окружения: {self.env}")
             return env_config
-        
+
         except FileNotFoundError:
-            logger.warning(f"Файл конфигурации не найден: {self.config_path}, используются значения по умолчанию")
+            logger.warning(
+                f"Файл конфигурации не найден: {self.config_path}, используются значения по умолчанию"
+            )
             return self._get_defaults()
         except yaml.YAMLError as e:
-            logger.error(f"Ошибка парсинга конфигурации: {e}, используются значения по умолчанию")
+            logger.error(
+                f"Ошибка парсинга конфигурации: {e}, используются значения по умолчанию"
+            )
             return self._get_defaults()
 
     """
     Возвращает значения по умолчанию
-    """    
+    """
+
     def _get_defaults(self) -> Dict[str, Any]:
         return {
             "min_age": 18,
-            "retry": {
-                "attempts": 3,
-                "delay": 1.0,
-                "backoff": 2.0
-            },
+            "retry": {"attempts": 3, "delay": 1.0, "backoff": 2.0},
             "input_file": "data/users.json",
             "output_file": "data/processed/users.csv",
             "logging": {
                 "level": "INFO",
-                "format": "%(asctime)s | %(levelname)8s |%(name)s | %(message)s"
-            }
+                "format": "%(asctime)s | %(levelname)8s |%(name)s | %(message)s",
+            },
         }
-    
+
     """
     Получает значение по ключу (поддерживает точечную нотацию)
     """
+
     def get(self, key: str, default: Any = None) -> Any:
         keys = key.split(".")
         value = self._config
@@ -85,36 +90,40 @@ class Config:
 
     """
     Удобный доступ к настройкам retry
-    """        
+    """
+
     @property
     def retry_settings(self) -> Dict[str, Any]:
         return {
             "max_attempts": self.get("retry.attempts", 3),
             "delay": self.get("retry.delay", 1.0),
-            "backoff": self.get("backoff", 2.0)
+            "backoff": self.get("backoff", 2.0),
         }
-    
+
     """
     Минимальный возраст для фильтрации
     """
+
     @property
     def min_age(self) -> int:
         return self.get("min_age", 18)
-    
+
     """
     Путь к входному файлу
     """
+
     @property
     def input_file(self) -> str:
         return self.get("input_file", "data/users.json")
-    
+
     """
     Путь к выходному файлу
     """
+
     @property
     def output_file(self) -> str:
         return self.get("output_file", "data/processed/users.csv")
-    
+
 
 """
 Загружает конфигурацию

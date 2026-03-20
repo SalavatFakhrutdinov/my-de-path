@@ -43,33 +43,26 @@ def parse_arguments() -> argparse.Namespace:
 """,
     )
 
-    parser.add_argument(
-        "--input", "-i", help="Введите путь к JSON файлу"
-    )
+    parser.add_argument("--input", "-i", help="Введите путь к JSON файлу")
 
     parser.add_argument("--output", "-o", help="Вывод пути CSV файла")
 
     parser.add_argument(
         "--min-age",
         type=int,
-        help=f"Минимальный возраст для фильтрации:"
-        f"(переопределяет config)",
+        help=f"Минимальный возраст для фильтрации:" f"(переопределяет config)",
     )
 
-    parser.add_argument(
-        "--config", "-c", help="Путь к YAML файлу конфигурации"
-    )
+    parser.add_argument("--config", "-c", help="Путь к YAML файлу конфигурации")
 
     parser.add_argument(
         "--env",
         choices=["development", "production", "testing"],
         default="development",
-        help="Окружение (по умолчанию: development)"
+        help="Окружение (по умолчанию: development)",
     )
 
-    parser.add_argument(
-        "--verbose", "-v", help="Включить подробный режим"
-    )
+    parser.add_argument("--verbose", "-v", help="Включить подробный режим")
 
     parser.add_argument("--log-file", help="Путь к файлу лога")
 

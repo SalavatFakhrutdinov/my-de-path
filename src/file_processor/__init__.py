@@ -7,9 +7,8 @@ from file_processor.constants import (
     DEFAULT_MIN_AGE,
     EXIT_SUCCESS,
     EXIT_FAILURE,
-    EXIT_INTERRUPT
+    EXIT_INTERRUPT,
 )
-
 
 __all__ = [
     "__version__",
