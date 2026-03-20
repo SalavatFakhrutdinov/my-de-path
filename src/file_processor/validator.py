@@ -1,6 +1,7 @@
 import logging
 from typing import List, Dict, Any, Tuple, Optional
-from constants import *
+
+from file_processor.constants import REQUIRED_FIELDS, MIN_AGE, MAX_AGE
 
 logger = logging.getLogger(__name__)
 
