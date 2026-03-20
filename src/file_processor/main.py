@@ -9,7 +9,7 @@ import sys
 import json
 from typing import NoReturn, List, Dict, Any
 
-from logging_config import configure_logging
+from src.file_processor.logging_config import configure_logging
 from reader import read_json_streaming, RETRYABLE_EXCEPTIONS
 from validator import validate_user, filter_adults, sort_by_age
 from transformations import apply_transformations

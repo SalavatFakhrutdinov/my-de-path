@@ -1,5 +1,5 @@
 from src.utils import normalize_name
-from logging_config import configure_logging
+from src.file_processor.logging_config import configure_logging
 
 
 def main():

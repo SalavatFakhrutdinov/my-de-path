@@ -6,7 +6,7 @@ from typing import NoReturn, Dict, List
 from constants import EXIT_INTERRUPT, EXIT_SUCCESS
 from default_users import DEFAULT_USERS
 
-from logging_config import configure_logging
+from src.file_processor.logging_config import configure_logging
 from utils import process_users
 
 logger = logging.getLogger(__name__)
