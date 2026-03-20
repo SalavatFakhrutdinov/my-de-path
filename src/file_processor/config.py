@@ -1,0 +1,141 @@
+import os
+import yaml
+from pathlib import Path
+from typing import Dict, Any, Optional
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+"""
+Класс для работы с конфигурацией
+"""
+
+
+class Config:
+    """
+    Инициализация конфигурации
+    """
+    def __init__(self, config_path: Optional[Path] = None, env: Optional[str] = None):
+        self.env = env or os.getenv("APP_ENV", "development")
+        self.config_path = config_path or self._get_default_config_path()
+        self._config = self._load_config()
+
+    """
+    Возвращает путь к конфигурационному файлу по умолчанию
+    """
+    def _get_default_config_path(self) -> Path:
+        current_dir = Path(__file__).parent
+        project_root = current_dir.parent.parent
+        return project_root / "configs" / "config.yaml"
+    
+    """
+    Загружает конфигурацию из YAML файла
+    """
+    def _load_config(self) -> Dict[str, Any]:
+        try:
+            with open(self.config_path, "r", encoding="utf-8") as file:
+                full_config = yaml.safe_load(file)
+
+            env_config = full_config.get(self.env, full_config.get("default", {}))
+
+            logger.info(f"Загружена конфигурация для окружения: {self.env}")
+            return env_config
+        
+        except FileNotFoundError:
+            logger.warning(f"Файл конфигурации не найден: {self.config_path}, используются значения по умолчанию")
+            return self._get_defaults()
+        except yaml.YAMLError as e:
+            logger.error(f"Ошибка парсинга конфигурации: {e}, используются значения по умолчанию")
+            return self._get_defaults()
+
+    """
+    Возвращает значения по умолчанию
+    """    
+    def _get_defaults(self) -> Dict[str, Any]:
+        return {
+            "min_age": 18,
+            "retry": {
+                "attempts": 3,
+                "delay": 1.0,
+                "backoff": 2.0
+            },
+            "input_file": "data/users.json",
+            "output_file": "data/processed/users.csv",
+            "logging": {
+                "level": "INFO",
+                "format": "%(asctime)s | %(levelname)8s |%(name)s | %(message)s"
+            }
+        }
+    
+    """
+    Получает значение по ключу (поддерживает точечную нотацию)
+    """
+    def get(self, key: str, default: Any = None) -> Any:
+        keys = key.split(".")
+        value = self._config
+
+        for k in keys:
+            if isinstance(value, dict):
+                value = value.get(k)
+                if value is None:
+                    return default
+            else:
+                return default
+
+    """
+    Удобный доступ к настройкам retry
+    """        
+    @property
+    def retry_settings(self) -> Dict[str, Any]:
+        return {
+            "max_attempts": self.get("retry.attempts", 3),
+            "delay": self.get("retry.delay", 1.0),
+            "backoff": self.get("backoff", 2.0)
+        }
+    
+    """
+    Минимальный возраст для фильтрации
+    """
+    @property
+    def min_age(self) -> int:
+        return self.get("min_age", 18)
+    
+    """
+    Путь к входному файлу
+    """
+    @property
+    def input_file(self) -> str:
+        return self.get("input_file", "data/users.json")
+    
+    """
+    Путь к выходному файлу
+    """
+    @property
+    def output_file(self) -> str:
+        return self.get("output_file", "data/processed/users.csv")
+    
+
+"""
+Загружает конфигурацию
+"""
+
+
+def load_config(config_path: Optional[str] = None, env: Optional[str] = None) -> Config:
+    path = Path(config_path) if config_path else None
+    return Config(config_path=path, env=env)
+
+
+_config: Optional[Config] = None
+
+
+"""
+Возвращает глобальный экземпляр конфигурации
+"""
+
+
+def get_config() -> Config:
+    global _config
+    if _config is None:
+        _config = load_config()
+    return _config
