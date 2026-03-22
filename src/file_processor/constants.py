@@ -1,5 +1,6 @@
 # Константы для валидации (validators.py)
-REQUIRED_FIELDS = {"id", "name", "age"}
+USER_REQUIRED_FIELDS = {"id", "name", "age"}
+ORDER_REQUIRED_FIELDS = {"order_id", "user_id", "amount", "created_at"}
 MIN_AGE = 0
 MAX_AGE = 120
 
