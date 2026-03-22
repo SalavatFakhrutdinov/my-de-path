@@ -9,19 +9,23 @@ import sys
 import json
 from typing import NoReturn, List, Dict, Any
 
-from file_processor.logging_config import configure_logging
-from file_processor.config import load_config
-from file_processor.reader import read_json_streaming, RETRYABLE_EXCEPTIONS
-from file_processor.validator import validate_user, filter_adults, sort_by_age
-from src.file_processor.transformer import apply_transformations
-from file_processor.writer import write_csv
-from file_processor.constants import (
+from file_processor.common.logging_config import configure_logging
+from file_processor.common.config import load_config
+from file_processor.common.reader import read_json_streaming
+from file_processor.user_filter.validator import (
+    validate_user, 
+    filter_adults, 
+    sort_by_age
+)
+from file_processor.user_filter.transformations import apply_transformations
+from file_processor.common.writer import write_csv
+from file_processor.common.constants import (
     DEFAULT_MIN_AGE,
     EXIT_SUCCESS,
     EXIT_FAILURE,
     EXIT_INTERRUPT,
 )
-from file_processor.retry import RETRYABLE_EXCEPTIONS
+from file_processor.common.retry import RETRYABLE_EXCEPTIONS
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +66,10 @@ def parse_arguments() -> argparse.Namespace:
         help="Окружение (по умолчанию: development)",
     )
 
-    parser.add_argument("--verbose", "-v", help="Включить подробный режим")
+    parser.add_argument(
+        "--verbose", "-v", 
+        action="store_true", 
+        help="Включить подробный режим")
 
     parser.add_argument("--log-file", help="Путь к файлу лога")
 
@@ -90,7 +97,15 @@ def print_pipeline_stats(stats: dict) -> None:
 """
 
 
-def run_application(args: argparse.Namespace) -> int:
+def run_application(args: argparse.Namespace, config) -> int:
+    input_file = args.input or config.input_file
+    output_file = args.output or config.output_file
+    min_age = args.min_age if args.min_age is not None else config.min_age
+
+    if not input_file or not output_file:
+        logger.error("Не указаны входной и выходной файлы")
+        return EXIT_FAILURE
+
     logger.info("=" * 50)
     logger.info("ЗАПУСК ОБРАБОТКИ ПОЛЬЗОВАТЕЛЕЙ")
     logger.info("=" * 50)
@@ -105,7 +120,7 @@ def run_application(args: argparse.Namespace) -> int:
         "written_records": 0,
     }
 
-    valid_users: List[Dict[str, Any]] = []
+    all_valid_users: List[Dict[str, Any]] = []
 
     try:
         for line_num, user in enumerate(read_json_streaming(args.input, 1)):
@@ -115,23 +130,21 @@ def run_application(args: argparse.Namespace) -> int:
 
             if is_valid:
                 stats["valid_records"] += 1
-
                 transformed = apply_transformations(user)
-
-                if transformed["age"] >= args.min_age:
-                    valid_users.append(transformed)
+                all_valid_users.append(transformed)
             else:
                 stats["invalid_records"] += 1
                 logger.warning(
                     f"Пропуск невалидной записи в строке {line_num}: {errors}"
                 )
 
-        valid_users = sort_by_age(valid_users)
-        stats["written_records"] = len(valid_users)
+        adult_users = filter_adults(all_valid_users, min_age)
+        adult_users = sort_by_age(adult_users)
+        stats["written_records"] = len(adult_users)
 
-        logger.info(f"Запись {len(valid_users)} строк в {args.output}")
+        logger.info(f"Запись {len(adult_users)} строк в {args.output}")
         success = write_csv(
-            valid_users, args.output, fields=["id", "name", "age"], allow_empty=True
+            adult_users, args.output, fields=["id", "name", "age"], allow_empty=True
         )
 
         if not success:
@@ -140,9 +153,9 @@ def run_application(args: argparse.Namespace) -> int:
 
         print_pipeline_stats(stats)
 
-        if valid_users and logger.isEnabledFor(logging.DEBUG):
-            logger.debug(f"Пример трансформированного пользователя: {valid_users[0]}")
-            if "age_group" in valid_users[0]:
+        if adult_users and logger.isEnabledFor(logging.DEBUG):
+            logger.debug(f"Пример трансформированного пользователя: {adult_users[0]}")
+            if "age_group" in adult_users[0]:
                 logger.debug(f"Возрастные группы добавлены")
 
     except KeyboardInterrupt:
@@ -165,15 +178,21 @@ def run_application(args: argparse.Namespace) -> int:
 def main() -> NoReturn:
     args = parse_arguments()
 
+    config = load_config(
+        config_path=args.config,
+        env=args.env
+    )
+
+    log_level = "DEBUG" if args.verbose else config.get("logging.level", "INFO")
     configure_logging(
-        level="DEBUG" if args.verbose else "INFO",
+        level=log_level,
         log_file=args.log_file,
         verbose=args.verbose,
     )
 
     try:
         exit_code = run_application(args)
-        sys.exit(exit_code)
+        sys.exit(EXIT_SUCCESS)
 
     except KeyboardInterrupt:
         logger.warning("Программа завершена пользователем")

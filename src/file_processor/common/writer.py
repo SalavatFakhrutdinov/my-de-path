@@ -92,18 +92,3 @@ def ensure_output_directory(filepath: str) -> None:
     if directory and not os.path.exists(directory):
         os.makedirs(directory, exist_ok=True)
         logger.debug(f"Создана директория: {directory}")
-
-
-# Специализированная запись для ETL-pipeline
-"""
-Записывает обогащенные заказы в CSV
-"""
-def write_enriched_orders(
-    data: List[Dict[str, Any]],
-    filepath: str,
-    fields: Optional[List[str]] = None
-) -> bool:
-    if fields is None:
-        fields = ["user_id", "name", "age", "order_id", "created_at"]
-    
-    return write_csv(data, filepath, fields, allow_empty=True)

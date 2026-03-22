@@ -2,7 +2,7 @@ import json
 import logging
 from typing import List, Dict, Any, Optional, Iterator
 
-from file_processor.reader import read_json_streaming, read_json_as_list
+from file_processor.common.reader import read_json_streaming, read_json_as_list
 
 logger = logging.getLogger(__name__)
 
