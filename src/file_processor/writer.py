@@ -1,6 +1,7 @@
 import csv
 import logging
-from typing import List, Dict, Any, Optional
+import os
+from typing import List, Dict, Any, Optional, Iterator
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +27,8 @@ def write_csv(
     elif fields is None:
         logger.error("Невозможно прочитать CSV: нет данных и нет определенных полей")
         return False
+    
+    ensure_output_directory(filepath)
 
     logger.info(f"Запись {len(data)} записей в {filepath}")
     logger.debug(f"Поля: {fields}")
@@ -43,6 +46,9 @@ def write_csv(
     except PermissionError:
         logger.error(f"Доступ запрещен: {filepath}")
         return False
+    except Exception as e:
+        logger.exception(f"Ошибка записи в {filepath}: {e}")
+        return False
 
 
 """
@@ -51,7 +57,10 @@ def write_csv(
 
 
 def write_csv_streaming(data_iter, filepath: str, fields: List[str]) -> bool:
+    ensure_output_directory(filepath)
+
     logger.info(f"Запуск потоковой записи в {filepath}")
+    logger.debug(f"Поля: {fields}")
 
     try:
         with open(filepath, "w", encoding="utf-8", newline="") as file:
@@ -66,9 +75,35 @@ def write_csv_streaming(data_iter, filepath: str, fields: List[str]) -> bool:
                 if count % 10000 == 0:
                     logger.debug(f"Записано {count} строк")
 
-        logger.info(f"Успешно записано поточно {count} строк" f"в {filepath}")
+        logger.info(f"Успешно записано {count} строк в {filepath}")
         return True
 
     except Exception as e:
         logger.exception(f"Ошибка потоковой записи в {filepath}: {e}")
         return False
+
+
+# Вспомогательные функции
+"""
+Создание директории для выходного файла при отсутствии
+"""
+def ensure_output_directory(filepath: str) -> None:
+    directory = os.path.dirname(filepath)
+    if directory and not os.path.exists(directory):
+        os.makedirs(directory, exist_ok=True)
+        logger.debug(f"Создана директория: {directory}")
+
+
+# Специализированная запись для ETL-pipeline
+"""
+Записывает обогащенные заказы в CSV
+"""
+def write_enriched_orders(
+    data: List[Dict[str, Any]],
+    filepath: str,
+    fields: Optional[List[str]] = None
+) -> bool:
+    if fields is None:
+        fields = ["user_id", "name", "age", "order_id", "created_at"]
+    
+    return write_csv(data, filepath, fields, allow_empty=True)
