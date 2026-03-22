@@ -62,10 +62,11 @@ class Config:
 
     def _get_defaults(self) -> Dict[str, Any]:
         return {
-            "min_age": 18,
+            "users_file": "data/users.json",
+            "orders_file": "data/orders.json",
+            "output_file": "data/output/orders_enriched.csv",
+            "watermark": "2026-03-03",
             "retry": {"attempts": 3, "delay": 1.0, "backoff": 2.0},
-            "input_file": "data/users.json",
-            "output_file": "data/processed/users.csv",
             "logging": {
                 "level": "INFO",
                 "format": "%(asctime)s | %(levelname)8s |%(name)s | %(message)s",
@@ -87,19 +88,18 @@ class Config:
                     return default
             else:
                 return default
+        return value
+    
 
     """
-    Удобный доступ к настройкам retry
+    Переопределяет watermark (для CLI)
     """
 
-    @property
-    def retry_settings(self) -> Dict[str, Any]:
-        return {
-            "max_attempts": self.get("retry.attempts", 3),
-            "delay": self.get("retry.delay", 1.0),
-            "backoff": self.get("backoff", 2.0),
-        }
+    def set_watermark(self, watermark: str) -> None:
+        self._config["watermark"] = watermark
+        logger.info(f"Watermark установлен: {watermark}")
 
+    # Свойства для фильтрации пользователей (обратная совместимость)
     """
     Минимальный возраст для фильтрации
     """
@@ -123,7 +123,52 @@ class Config:
     @property
     def output_file(self) -> str:
         return self.get("output_file", "data/processed/users.csv")
+    
+    # Свойства для ETL-pipeline
+    """
+    Путь к файлу пользователей
+    """
 
+    @property
+    def users_file(self) -> str:
+        return self.get("users_file", "data/users.json")
+
+
+    """
+    Путь к файлу заказов
+    """
+
+    @property
+    def orders_file(self) -> str:
+        return self.get("orders_file", "data/orders.json")
+    
+    """
+    Путь к выходному файлу с обогащенными заказами
+    """
+
+    @property
+    def enriched_output_file(self) -> str:
+        return self.get("output_file", "data/output/orders_enriched.csv")
+    
+    """
+    Watermark для инкрементальной обработки
+    """
+
+    @property
+    def watermark(self) -> str:
+        return self.get("watermark", "2026-03-03")
+    
+    """
+    Удобный доступ к настройкам retry
+    """
+
+    @property
+    def retry_settings(self) -> Dict[str, Any]:
+        return {
+            "max_attempts": self.get("retry.attempts", 3),
+            "delay": self.get("retry.delay", 1.0),
+            "backoff": self.get("backoff", 2.0),
+        }
 
 """
 Загружает конфигурацию
@@ -135,6 +180,7 @@ def load_config(config_path: Optional[str] = None, env: Optional[str] = None) ->
     return Config(config_path=path, env=env)
 
 
+# Глобальный экземпляр конфигурации
 _config: Optional[Config] = None
 
 
