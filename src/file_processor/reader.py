@@ -116,3 +116,11 @@ def _read_json_array_streaming(file_obj) -> Iterator[Dict[str, Any]]:
             continue
         else:
             buffer += char
+
+
+"""
+Чтение JSON файла как список (целиком)
+"""
+def read_json_as_list(filepath: str) -> list:
+    logger.info(f"Чтение JSON файла целиком: {filepath}")
+    return list(read_json_streaming(filepath))
