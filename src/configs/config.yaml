@@ -2,15 +2,16 @@
 
 # Общие настройки (базовый шаблон)
 default: &default
-  min_age: 18
+  users_file: "data/users.json"
+  orders_file: "data/orders.json"
+  output_file: "data/output/orders_enriched.csv"
+
+  watermark: "2026-03-03"
 
   retry:
     attempts: 3
     delay: 1.0
     backoff: 2.0
-
-    input_file: "data/users.json"
-    output_file: "data/processed/users.csv"
 
     logging:
       level: "INFO"
@@ -18,20 +19,21 @@ default: &default
 
   development:
     <<: *default
-    min_age: 18
     logging:
       level: "DEBUG"
 
   production:
     <<: *default
-    min_age: 18
-    input_file: "/var/data/users.json"
-    output_file: "/var/data/processed/users.csv"
+    users_file: "/var/data/users.json"
+    orders_file: "/var/data/orders.json"
+    output_file: "/var/data/output/orders_enriched.csv"
+    watermark: "2026-03-03"
     logging:
       level: "WARNING"
 
   testing:
     <<: *default
-    input_file: "/tests/fixtures/users.json"
-    output_file: "/tests/fixtures/output.csv"
-    min_age: 18
+    users_file: "/tests/fixtures/users.json"
+    orders_file: "/tests/fixtures/orders.json"
+    output_file: "/tests/fixtures/output/orders_enriched.csv"
+    watermark: "2026-03-03"
