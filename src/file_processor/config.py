@@ -167,7 +167,7 @@ class Config:
         return {
             "max_attempts": self.get("retry.attempts", 3),
             "delay": self.get("retry.delay", 1.0),
-            "backoff": self.get("backoff", 2.0),
+            "backoff": self.get("retry.backoff", 2.0),
         }
 
 """
