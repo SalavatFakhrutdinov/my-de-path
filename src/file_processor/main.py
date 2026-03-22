@@ -13,7 +13,7 @@ from file_processor.logging_config import configure_logging
 from file_processor.config import load_config
 from file_processor.reader import read_json_streaming, RETRYABLE_EXCEPTIONS
 from file_processor.validator import validate_user, filter_adults, sort_by_age
-from file_processor.transformations import apply_transformations
+from src.file_processor.transformer import apply_transformations
 from file_processor.writer import write_csv
 from file_processor.constants import (
     DEFAULT_MIN_AGE,
