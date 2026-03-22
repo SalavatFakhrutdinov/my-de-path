@@ -1,27 +1,24 @@
-from file_processor.main import main, run_application, parse_arguments
-from file_processor.reader import read_json_streaming
-from file_processor.validator import validate_user, filter_adults, sort_by_age
-from src.file_processor.transformer import apply_transformations
-from file_processor.writer import write_csv
-from file_processor.constants import (
-    DEFAULT_MIN_AGE,
-    EXIT_SUCCESS,
-    EXIT_FAILURE,
-    EXIT_INTERRUPT,
+from file_processor import common
+from file_processor import user_filter
+from file_processor import orders_enrichment
+
+from file_processor.common import (
+    load_config,
+    read_json_streaming,
+    write_csv,
+    configure_logging
 )
+from file_processor.common.constants import EXIT_SUCCESS, EXIT_INTERRUPT, EXIT_FAILURE
 
 __all__ = [
     "__version__",
-    "main",
-    "run_application",
-    "parse_arguments",
+    "common",
+    "user_filter",
+    "orders_enrichment",
+    "load_config",
     "read_json_streaming",
-    "validate_user",
-    "filter_adults",
-    "sort_by_age",
-    "apply_transformations",
     "write_csv",
-    "DEFAULT_MIN_AGE",
+    "configure_logging",
     "EXIT_SUCCESS",
     "EXIT_FAILURE",
     "EXIT_INTERRUPT",
