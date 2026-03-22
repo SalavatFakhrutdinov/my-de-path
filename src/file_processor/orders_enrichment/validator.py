@@ -10,24 +10,20 @@ logger = logging.getLogger(__name__)
 
 
 def validate_order(
-        order: Dict[str, Any],
-        user_ids: set,
-        line_num: Optional[int] = None
+    order: Dict[str, Any], user_ids: set, line_num: Optional[int] = None
 ) -> Tuple[bool, List[str]]:
     errors = []
     location = f"в строке {line_num}" if line_num else ""
 
     if not isinstance(order, dict):
-        errors.append(
-            f"Заказ {location} не является словарем: {type(order).__name__}"
-        )
+        errors.append(f"Заказ {location} не является словарем: {type(order).__name__}")
         return False, errors
-    
+
     order_missing = ORDER_REQUIRED_FIELDS - order.keys()
     if order_missing:
         errors.append(f"В заказе {location} пропущены поля: {order_missing}")
         return False, errors
-    
+
     try:
         amount = order["amount"]
         if not isinstance(amount, (int, float)):
@@ -44,9 +40,7 @@ def validate_order(
 
     user_id = order.get("user_id")
     if user_id is not None and user_id not in user_ids:
-        errors.append(
-            f"Заказ {location}: пользователь с id={user_id} не существует"
-        )
+        errors.append(f"Заказ {location}: пользователь с id={user_id} не существует")
 
     for field in ORDER_REQUIRED_FIELDS:
         if order.get(field) is None:
@@ -70,8 +64,7 @@ def validate_order(
 
 
 def filter_by_watermark(
-    orders: List[Dict[str, Any]],
-    watermark: str
+    orders: List[Dict[str, Any]], watermark: str
 ) -> List[Dict[str, Any]]:
     logger.info(f"Фильтрация заказов по watermark: {watermark}")
 
@@ -88,7 +81,7 @@ def filter_by_watermark(
                 f"Пропущен заказ {order.get('order_id')}: "
                 f"created_at={created_at} <= {watermark}"
             )
-    
+
     logger.info(
         f"Отфильтровано {len(filtered)} заказов из {len(orders)} "
         f"пропущено {skipped}"
@@ -100,5 +93,7 @@ def filter_by_watermark(
 """
 Извлечение множества ID пользователей
 """
+
+
 def get_user_ids(users: List[Dict[str, Any]]) -> set:
     return {user.get("id") for user in users if user.get("id") is not None}

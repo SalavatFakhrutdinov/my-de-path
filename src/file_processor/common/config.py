@@ -89,7 +89,6 @@ class Config:
             else:
                 return default
         return value
-    
 
     """
     Переопределяет watermark (для CLI)
@@ -123,7 +122,7 @@ class Config:
     @property
     def output_file(self) -> str:
         return self.get("output_file", "data/processed/users.csv")
-    
+
     # Свойства для ETL-pipeline
     """
     Путь к файлу пользователей
@@ -133,7 +132,6 @@ class Config:
     def users_file(self) -> str:
         return self.get("users_file", "data/users.json")
 
-
     """
     Путь к файлу заказов
     """
@@ -141,7 +139,7 @@ class Config:
     @property
     def orders_file(self) -> str:
         return self.get("orders_file", "data/orders.json")
-    
+
     """
     Путь к выходному файлу с обогащенными заказами
     """
@@ -149,7 +147,7 @@ class Config:
     @property
     def enriched_output_file(self) -> str:
         return self.get("output_file", "data/output/orders_enriched.csv")
-    
+
     """
     Watermark для инкрементальной обработки
     """
@@ -157,7 +155,7 @@ class Config:
     @property
     def watermark(self) -> str:
         return self.get("watermark", "2026-03-03")
-    
+
     """
     Удобный доступ к настройкам retry
     """
@@ -169,6 +167,7 @@ class Config:
             "delay": self.get("retry.delay", 1.0),
             "backoff": self.get("retry.backoff", 2.0),
         }
+
 
 """
 Загружает конфигурацию

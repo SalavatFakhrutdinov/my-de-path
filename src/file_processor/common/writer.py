@@ -27,7 +27,7 @@ def write_csv(
     elif fields is None:
         logger.error("Невозможно прочитать CSV: нет данных и нет определенных полей")
         return False
-    
+
     ensure_output_directory(filepath)
 
     logger.info(f"Запись {len(data)} записей в {filepath}")
@@ -87,6 +87,8 @@ def write_csv_streaming(data_iter, filepath: str, fields: List[str]) -> bool:
 """
 Создание директории для выходного файла при отсутствии
 """
+
+
 def ensure_output_directory(filepath: str) -> None:
     directory = os.path.dirname(filepath)
     if directory and not os.path.exists(directory):

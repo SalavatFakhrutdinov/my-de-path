@@ -1,6 +1,7 @@
 """
 ETL-pipeline для обогащения заказов данными пользователей
 """
+
 import argparse
 import logging
 import sys
@@ -13,17 +14,17 @@ from file_processor.common.writer import write_csv
 from file_processor.common.constants import EXIT_SUCCESS, EXIT_FAILURE, EXIT_INTERRUPT
 from file_processor.common.retry import RETRYABLE_EXCEPTIONS
 from file_processor.orders_enrichment.validator import (
-    filter_by_watermark, 
-    validate_order
+    filter_by_watermark,
+    validate_order,
 )
-from file_processor.orders_enrichment.extractor import(
+from file_processor.orders_enrichment.extractor import (
     extract_users,
     extract_orders,
-    get_user_ids
+    get_user_ids,
 )
-from file_processor.orders_enrichment.transformer import(
+from file_processor.orders_enrichment.transformer import (
     join_users_orders,
-    enrich_orders_with_user_data
+    enrich_orders_with_user_data,
 )
 
 logger = logging.getLogger(__name__)
@@ -32,6 +33,8 @@ logger = logging.getLogger(__name__)
 """
 Парсит аргументы командной строки
 """
+
+
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="ETL-pipeline для обогащения заказов данными пользователей",
@@ -43,30 +46,27 @@ def parse_arguments() -> argparse.Namespace:
   python -m file_processor.orders_enrichment.main --env production
   python -m file_processor.orders_enrichment.main --verbose
   python -m file_processor.orders_enrichment.main --watermark "2026-03-10"
-        """
+        """,
     )
 
-    parser.add_argument(
-        "--config", "-c",
-        help="Путь к YAML файлу конфигурации"
-    )
+    parser.add_argument("--config", "-c", help="Путь к YAML файлу конфигурации")
 
     parser.add_argument(
         "--env",
         choices=["development", "production", "testing"],
         default="development",
-        help="Окружение (по умолчанию: development)"
+        help="Окружение (по умолчанию: development)",
     )
 
     parser.add_argument(
-        "--verbose", "-v", 
-        action="store_true", 
-        help="Включить подробный режим (DEBUG уровень)"
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="Включить подробный режим (DEBUG уровень)",
     )
 
     parser.add_argument(
-        "--watermark",
-        help="Переопределить watermark (формат YYYY-MM-DD)"
+        "--watermark", help="Переопределить watermark (формат YYYY-MM-DD)"
     )
 
     return parser.parse_args()
@@ -102,7 +102,7 @@ def run_etl_pipeline(config) -> dict:
         "orders_filtered": 0,
         "orders_valid": 0,
         "orders_invalid": 0,
-        "orders_enriched": 0
+        "orders_enriched": 0,
     }
 
     # Шаг 1 - EXTRACT
@@ -114,12 +114,11 @@ def run_etl_pipeline(config) -> dict:
     if users is None:
         logger.error("Не удалось извлечь пользователей")
         return stats
-    
+
     orders = extract_users(config.orders_file)
     if orders is None:
         logger.error("Не удалось извлечь заказы")
         return stats
-    
 
     stats["users_read"] = len(users)
     stats["orders_read"] = len(orders)
@@ -138,7 +137,7 @@ def run_etl_pipeline(config) -> dict:
     if not filtered_orders:
         logger.info("Нет заказов после фильтрации, пайплайн завершен")
         return stats
-    
+
     # Шаг 3 - DATA QUALITY
     logger.info("=" * 50)
     logger.info("Шаг 3 - DATA QUALITY")
@@ -155,10 +154,8 @@ def run_etl_pipeline(config) -> dict:
             stats["orders_valid"] += 1
         else:
             stats["orders_invalid"] += 1
-            logger.warning(
-                f"Невалидный заказ {order.get('order_id')}: {errors}"
-            )
-    
+            logger.warning(f"Невалидный заказ {order.get('order_id')}: {errors}")
+
     logger.info(
         f"Валидных заказов: {stats['orders_valid']}"
         f"Невалидных заказов: {stats['orders_invalid']}"
@@ -167,7 +164,7 @@ def run_etl_pipeline(config) -> dict:
     if not valid_orders:
         logger.warning("Нет валидных заказов после DQ-проверок")
         return stats
-    
+
     # Шаг 4 - JOIN (TRANSFORM)
     logger.info("=" * 50)
     logger.info("Шаг 4 - JOIN (TRANSFORM)")
@@ -184,16 +181,13 @@ def run_etl_pipeline(config) -> dict:
 
     fields = ["user_id", "name", "age", "order_id", "amount", "created_at"]
     success = write_csv(
-        enriched_orders,
-        config.enriched_output_file,
-        fields,
-        allow_empty=True
+        enriched_orders, config.enriched_output_file, fields, allow_empty=True
     )
 
     if not success:
         logger.error("Ошибка записи результата")
         return stats
-    
+
     return stats
 
 
@@ -205,16 +199,10 @@ def run_etl_pipeline(config) -> dict:
 def main() -> NoReturn:
     args = parse_arguments()
 
-    config = load_config(
-        config_path=args.config,
-        env=args.env
-    )
+    config = load_config(config_path=args.config, env=args.env)
 
     log_level = "DEBUG" if args.verbose else config.get("logging.level", "INFO")
-    configure_logging(
-        level=log_level,
-        verbose=args.verbose
-    )
+    configure_logging(level=log_level, verbose=args.verbose)
 
     if args.watermark:
         config.set_watermark(args.watermark)

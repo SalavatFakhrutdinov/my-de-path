@@ -7,6 +7,8 @@ logger = logging.getLogger(__name__)
 """
 Построение словаря для быстрого доступа к пользователям по ID
 """
+
+
 def build_user_map(users: List[Dict[str, Any]]) -> Dict[int, Dict[str, Any]]:
     user_map = {}
     for user in users:
@@ -23,9 +25,10 @@ def build_user_map(users: List[Dict[str, Any]]) -> Dict[int, Dict[str, Any]]:
 """
 LEFT JOIN пользователей с заказами
 """
+
+
 def join_users_orders(
-    users: List[Dict[str, Any]],
-    orders: List[Dict[str, Any]]
+    users: List[Dict[str, Any]], orders: List[Dict[str, Any]]
 ) -> List[Dict[str, Any]]:
     logger.info(f"JOIN: {len(users)} пользователей, {len(orders)} заказов")
 
@@ -55,18 +58,19 @@ def join_users_orders(
         }
         enriched.append(enriched_order)
 
-    logger.info(f"Обогащено {len(enriched)} заказов "
-                f"пропущено {skipped}")
+    logger.info(f"Обогащено {len(enriched)} заказов " f"пропущено {skipped}")
     return enriched
 
 
 """
 Обогащение заказов данными пользователей с опциональным применением трансформаций
 """
+
+
 def enrich_orders_with_user_data(
     users: List[Dict[str, Any]],
     orders: List[Dict[str, Any]],
-    apply_user_transformations: bool = False
+    apply_user_transformations: bool = False,
 ) -> List[Dict[str, Any]]:
     processed_users = users
     if apply_user_transformations:

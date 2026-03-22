@@ -13,9 +13,9 @@ from file_processor.common.logging_config import configure_logging
 from file_processor.common.config import load_config
 from file_processor.common.reader import read_json_streaming
 from file_processor.user_filter.validator import (
-    validate_user, 
-    filter_adults, 
-    sort_by_age
+    validate_user,
+    filter_adults,
+    sort_by_age,
 )
 from file_processor.user_filter.transformations import apply_transformations
 from file_processor.common.writer import write_csv
@@ -67,9 +67,8 @@ def parse_arguments() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        "--verbose", "-v", 
-        action="store_true", 
-        help="Включить подробный режим")
+        "--verbose", "-v", action="store_true", help="Включить подробный режим"
+    )
 
     parser.add_argument("--log-file", help="Путь к файлу лога")
 
@@ -178,10 +177,7 @@ def run_application(args: argparse.Namespace, config) -> int:
 def main() -> NoReturn:
     args = parse_arguments()
 
-    config = load_config(
-        config_path=args.config,
-        env=args.env
-    )
+    config = load_config(config_path=args.config, env=args.env)
 
     log_level = "DEBUG" if args.verbose else config.get("logging.level", "INFO")
     configure_logging(

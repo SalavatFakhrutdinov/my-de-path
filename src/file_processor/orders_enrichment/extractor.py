@@ -10,6 +10,8 @@ logger = logging.getLogger(__name__)
 """
 Извлечение всех пользователей/заказов из файла
 """
+
+
 def extract_users(filepath: str) -> Optional[List[Dict[str, Any]]]:
     logger.info(f"Извлечение пользователей из {filepath}")
 
@@ -20,7 +22,7 @@ def extract_users(filepath: str) -> Optional[List[Dict[str, Any]]]:
     except Exception as e:
         logger.error(f"Ошибка извлечения пользователей: {e}")
         return None
-    
+
 
 def extract_orders(filepath: str) -> Optional[List[Dict[str, Any]]]:
     logger.info(f"Извлечение заказов из {filepath}")
@@ -32,14 +34,17 @@ def extract_orders(filepath: str) -> Optional[List[Dict[str, Any]]]:
     except Exception as e:
         logger.error(f"Ошибка извлечения заказов: {e}")
         return None
-    
+
 
 """
 Извлечение пользователей/заказов потоком
 """
+
+
 def extract_users_streaming(filepath: str) -> Iterator[Dict[str, Any]]:
     logger.info(f"Потоковое извлечение пользователей из {filepath}")
     yield from read_json_streaming(filepath)
+
 
 def extract_orders_streaming(filepath: str) -> Iterator[Dict[str, Any]]:
     logger.info(f"Потоковое извлечение заказов из {filepath}")
@@ -49,5 +54,7 @@ def extract_orders_streaming(filepath: str) -> Iterator[Dict[str, Any]]:
 """
 Извлечение множество ID пользователей
 """
+
+
 def get_user_ids(users: List[Dict[str, Any]]) -> set:
     return {user.get("id") for user in users if user.get("id") is not None}
