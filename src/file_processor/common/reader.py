@@ -2,7 +2,7 @@ import json
 import logging
 from typing import List, Dict, Any, Optional, Iterator
 
-from file_processor.retry import retry, RETRYABLE_EXCEPTIONS
+from file_processor.common.retry import retry, RETRYABLE_EXCEPTIONS
 
 logger = logging.getLogger(__name__)
 
