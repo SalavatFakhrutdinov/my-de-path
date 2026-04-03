@@ -167,6 +167,84 @@ class Config:
             "delay": self.get("retry.delay", 1.0),
             "backoff": self.get("retry.backoff", 2.0),
         }
+    
+    # Конфигурация для PostgreSQL
+
+    """
+    Хост
+    """
+
+    @property
+    def pg_host(self) -> str:
+        return self.get("postgres.host", "localhost")
+    
+    """
+    Порт
+    """
+
+    @property
+    def pg_port(self) -> int:
+        return self.get("postgres.port", 5432)
+    
+    """
+    Название БД
+    """
+
+    @property
+    def pg_database(self) -> str:
+        return self.get("postgres.database", "etl_db")
+    
+    """
+    Пользователь
+    """
+
+    @property
+    def pg_user(self) -> str:
+        return self.get("postgres.user", "postgres")
+    
+    """
+    Пароль
+    """
+
+    @property
+    def pg_password(self) -> str:
+        password = self.get("postgres.password", "")
+
+        if password.startswith("${") and password.endswith("}"):
+            import os
+            env_var = password[2:-1]
+            return os.getenv(env_var, "")
+        return password
+    
+    """
+    Минимальное количество подключений
+    """
+
+    @property
+    def pg_min_connections(self) -> int:
+        return self.get("postgres.pool.min_connections", 1)
+    
+    """
+    Максимальное количество подключений
+    """
+
+    @property
+    def pg_max_connections(self) -> int:
+        return self.get("postgres.pool.max_connections", 10)
+    
+    """
+    Строка подключения к БД
+    """
+
+    @property
+    def pg_connection_string(self) -> str:
+        return {
+            f"host={self.pg_host} "
+            f"port={self.pg_port} "
+            f"dbname={self.pg_database} "
+            f"user={self.pg_user} "
+            f"password={self.pg_password}"
+        }
 
 
 """
