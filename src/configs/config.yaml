@@ -17,23 +17,51 @@ default: &default
     level: "INFO"
     format: "%(asctime)s | %(levelname)8s | %(name)s | %(message)s"
 
-  development:
-    <<: *default
-    logging:
-      level: "DEBUG"
+  postgres:
+    host: "localhost"
+    port: 5432
+    database: "etl_db"
+    user: "postgres"
+    password: "postgres"
+    pool:
+      min_connections: 1
+      max_connections: 10
 
-  production:
-    <<: *default
-    users_file: "/var/data/users.json"
-    orders_file: "/var/data/orders.json"
-    output_file: "/var/data/output/orders_enriched.csv"
-    watermark: "2026-03-03"
-    logging:
-      level: "WARNING"
+development:
+  <<: *default
+  logging:
+    level: "DEBUG"
 
-  testing:
-    <<: *default
-    users_file: "/tests/fixtures/users.json"
-    orders_file: "/tests/fixtures/orders.json"
-    output_file: "/tests/fixtures/output/orders_enriched.csv"
-    watermark: "2026-03-03"
+production:
+  <<: *default
+  users_file: "/var/data/users.json"
+  orders_file: "/var/data/orders.json"
+  output_file: "/var/data/output/orders_enriched.csv"
+  watermark: "2026-03-03"
+  postgres:
+    host: "prod-db.example.com"
+    port: 5432
+    database: "prod_etl_db"
+    user: "etl_user"
+    password: "${DB_PASSWORD}"
+    pool:
+      min_connections: 5
+      max_connections: 20
+  logging:
+    level: "WARNING"
+
+testing:
+  <<: *default
+  users_file: "/tests/fixtures/users.json"
+  orders_file: "/tests/fixtures/orders.json"
+  output_file: "/tests/fixtures/output/orders_enriched.csv"
+  watermark: "2026-03-03"
+  postgres:
+    host: "localhost"
+    port: 5432
+    database: "test_etl_db"
+    user: "test_user"
+    password: "test"
+    pool:
+      min_connections: 1
+      max_connections: 5
