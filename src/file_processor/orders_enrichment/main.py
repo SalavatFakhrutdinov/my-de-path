@@ -115,7 +115,7 @@ def run_etl_pipeline(config) -> dict:
         logger.error("Не удалось извлечь пользователей")
         return stats
 
-    orders = extract_users(config.orders_file)
+    orders = extract_orders(config.orders_file)
     if orders is None:
         logger.error("Не удалось извлечь заказы")
         return stats
