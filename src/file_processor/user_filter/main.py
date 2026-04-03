@@ -187,7 +187,7 @@ def main() -> NoReturn:
     )
 
     try:
-        exit_code = run_application(args)
+        exit_code = run_application(args, config)
         sys.exit(EXIT_SUCCESS)
 
     except KeyboardInterrupt:
