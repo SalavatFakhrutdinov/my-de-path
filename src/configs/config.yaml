@@ -13,9 +13,9 @@ default: &default
     delay: 1.0
     backoff: 2.0
 
-    logging:
-      level: "INFO"
-      format: "%(asctime)s | %(levelname)8s | %(name)s | %(message)s"
+  logging:
+    level: "INFO"
+    format: "%(asctime)s | %(levelname)8s | %(name)s | %(message)s"
 
   development:
     <<: *default
