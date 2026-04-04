@@ -10,4 +10,6 @@ platformdirs==4.9.4
 pycodestyle==2.14.0
 pyflakes==3.4.0
 pytokens==0.4.1
+psycopg2-binary==2.9.9
+pyyaml==6.0.1
 '''
