@@ -58,14 +58,14 @@ def create_tables_if_not_exists() -> None:
                 CREATE INDEX IF NOT EXISTS idx_orders_enriched_user_id
                 ON orders_enriched(user_id)
             """)
-            
+
             # индекс для поиска по created_at
 
             cur.execute("""
                 CREATE INDEX IF NOT EXISTS idx_orders_enriched_created_at
                 ON orders_enriched(created_at)
             """)
-    
+
     logger.info("Tables created/verified successfully")
 
 
@@ -74,16 +74,16 @@ def create_tables_if_not_exists() -> None:
 """
 
 
-def upsert_orders_enriched(
-        orders: List[Dict[str, Any]], batch_size: int = 1000
-    ) -> int:
+def upsert_orders_enriched(orders: List[Dict[str, Any]], batch_size: int = 1000) -> int:
     if not orders:
         logger.warning("No orders to upsert")
         return 0
-    
-    logger.info(f"UPSERT {len(orders)} orders into orders_enriched "
-                f"(batch_size={batch_size})")
-    
+
+    logger.info(
+        f"UPSERT {len(orders)} orders into orders_enriched "
+        f"(batch_size={batch_size})"
+    )
+
     # Преобразование в список кортежей для execute_values
 
     data_tuples = [
@@ -113,7 +113,7 @@ def upsert_orders_enriched(
                     ,updated_at = CURRENT_TIMESTAMP
                 """,
                 data_tuples,
-                page_size=batch_size
+                page_size=batch_size,
             )
 
     logger.info(f"UPSERT completed: {len(orders)} records")
@@ -137,7 +137,7 @@ def get_orders_after_date(date: str) -> List[Dict[str, Any]]:
                 WHERE created_at > %s
                 ORDER BY created_at DESC
                 """,
-                (date,)
+                (date,),
             )
 
             rows = cur.fetchall()
@@ -153,7 +153,7 @@ def get_orders_after_date(date: str) -> List[Dict[str, Any]]:
                 }
                 for row in rows
             ]
-    
+
     logger.info(f"Found {len(orders)} orders after {date}")
     return orders
 
@@ -181,7 +181,7 @@ def get_orders_by_user(user_id: int) -> List[Dict[str, Any]]:
                 WHERE user_id = %s
                 ORDER BY created_at DESC
                 """,
-                (user_id,)
+                (user_id,),
             )
 
             rows = cur.fetchall()
@@ -212,8 +212,7 @@ def get_statistics() -> Dict[str, Any]:
 
     with get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute(
-                """
+            cur.execute("""
                 SELECT
                     COUNT(*) as total_orders
                     ,COUNT(DISTINCT user_id) as unique_users
@@ -222,8 +221,7 @@ def get_statistics() -> Dict[str, Any]:
                     ,MIN(created_at) as first_order
                     ,MAX(created_at) as last_order
                 FROM orders_enriched
-                """
-            )
+                """)
 
             row = cur.fetchone()
 
@@ -236,6 +234,7 @@ def get_statistics() -> Dict[str, Any]:
                 "last_order": row[5] if row[5] else None,
             }
 
-    logger.info(f"Statistics: {stats['total_orders']} orders, "
-                f"{stats['unique_users']} users")
+    logger.info(
+        f"Statistics: {stats['total_orders']} orders, " f"{stats['unique_users']} users"
+    )
     return stats

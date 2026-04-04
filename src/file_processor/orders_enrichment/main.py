@@ -79,15 +79,11 @@ def parse_arguments() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        "--skip-db",
-        action="store_true",
-        help="Пропустить загрузку в БД (только CSV)"
+        "--skip-db", action="store_true", help="Пропустить загрузку в БД (только CSV)"
     )
 
     parser.add_argument(
-        "--skip-csv",
-        action="store_true",
-        help="Пропустить запись в CSV (только БД)"
+        "--skip-csv", action="store_true", help="Пропустить запись в CSV (только БД)"
     )
 
     return parser.parse_args()
@@ -215,11 +211,13 @@ def run_etl_pipeline(config, args) -> dict:
                 logger.info(f"В базу успешно загружено {loaded} заказов")
 
                 sample_orders = get_orders_after_date(config.watermark)
-                logger.info(f"Пример запроса: обнаружено {len(sample_orders)}"
-                            f"заказов после watermark")
+                logger.info(
+                    f"Пример запроса: обнаружено {len(sample_orders)}"
+                    f"заказов после watermark"
+                )
             else:
                 logger.warning("Подключение к базе неуспешно, пропуск загрузки в БД")
-        
+
         except Exception as e:
             logger.error(f"Неудачная попытка загрузки в БД: {e}")
             if not args.skip_csv:

@@ -167,7 +167,7 @@ class Config:
             "delay": self.get("retry.delay", 1.0),
             "backoff": self.get("retry.backoff", 2.0),
         }
-    
+
     # Конфигурация для PostgreSQL
 
     """
@@ -177,7 +177,7 @@ class Config:
     @property
     def pg_host(self) -> str:
         return self.get("postgres.host", "localhost")
-    
+
     """
     Порт
     """
@@ -185,7 +185,7 @@ class Config:
     @property
     def pg_port(self) -> int:
         return self.get("postgres.port", 5432)
-    
+
     """
     Название БД
     """
@@ -193,7 +193,7 @@ class Config:
     @property
     def pg_database(self) -> str:
         return self.get("postgres.database", "etl_db")
-    
+
     """
     Пользователь
     """
@@ -201,7 +201,7 @@ class Config:
     @property
     def pg_user(self) -> str:
         return self.get("postgres.user", "postgres")
-    
+
     """
     Пароль
     """
@@ -212,10 +212,11 @@ class Config:
 
         if password.startswith("${") and password.endswith("}"):
             import os
+
             env_var = password[2:-1]
             return os.getenv(env_var, "")
         return password
-    
+
     """
     Минимальное количество подключений
     """
@@ -223,7 +224,7 @@ class Config:
     @property
     def pg_min_connections(self) -> int:
         return self.get("postgres.pool.min_connections", 1)
-    
+
     """
     Максимальное количество подключений
     """
@@ -231,7 +232,7 @@ class Config:
     @property
     def pg_max_connections(self) -> int:
         return self.get("postgres.pool.max_connections", 10)
-    
+
     """
     Строка подключения к БД
     """

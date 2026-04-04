@@ -38,7 +38,7 @@ def get_connection_pool():
             keepalives=1,
             keepalives_idle=5,
             keepalives_interval=2,
-            keepalives_count=2
+            keepalives_count=2,
         )
 
         logger.info(

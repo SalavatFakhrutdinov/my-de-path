@@ -1,4 +1,8 @@
-from file_processor.orders_enrichment.main import main, run_etl_pipeline, parse_arguments
+from file_processor.orders_enrichment.main import (
+    main,
+    run_etl_pipeline,
+    parse_arguments,
+)
 from file_processor.orders_enrichment.extractor import (
     extract_users,
     extract_orders,
@@ -14,7 +18,7 @@ from file_processor.orders_enrichment.validator import (
 from file_processor.orders_enrichment.transformer import (
     build_user_map,
     join_users_orders,
-    enrich_orders_with_user_data
+    enrich_orders_with_user_data,
 )
 
 __version__ = "1.0.0"

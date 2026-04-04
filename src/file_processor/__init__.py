@@ -6,7 +6,7 @@ from file_processor.common import (
     load_config,
     read_json_streaming,
     write_csv,
-    configure_logging
+    configure_logging,
 )
 from file_processor.common.constants import EXIT_SUCCESS, EXIT_INTERRUPT, EXIT_FAILURE
 
