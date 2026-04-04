@@ -27,6 +27,14 @@ from file_processor.orders_enrichment.transformer import (
     enrich_orders_with_user_data,
 )
 
+from file_processor.db import (
+    upsert_orders_enriched,
+    get_orders_after_date,
+    create_tables_if_not_exists,
+    test_connection,
+)
+from file_processor.db.connection import close_pool
+
 logger = logging.getLogger(__name__)
 
 
@@ -46,6 +54,7 @@ def parse_arguments() -> argparse.Namespace:
   python -m file_processor.orders_enrichment.main --env production
   python -m file_processor.orders_enrichment.main --verbose
   python -m file_processor.orders_enrichment.main --watermark "2026-03-10"
+  python -m file_processor.orders_enrichment.main --skip-db
         """,
     )
 
@@ -69,6 +78,18 @@ def parse_arguments() -> argparse.Namespace:
         "--watermark", help="Переопределить watermark (формат YYYY-MM-DD)"
     )
 
+    parser.add_argument(
+        "--skip-db",
+        action="store_true",
+        help="Пропустить загрузку в БД (только CSV)"
+    )
+
+    parser.add_argument(
+        "--skip-csv",
+        action="store_true",
+        help="Пропустить запись в CSV (только БД)"
+    )
+
     return parser.parse_args()
 
 
@@ -87,6 +108,7 @@ def print_stats(stats: dict) -> None:
     logger.info(f"Валидных заказов: {stats.get('orders_valid', 0)}")
     logger.info(f"Невалидных заказов: {stats.get('orders_invalid', 0)}")
     logger.info(f"Обогащенных заказов: {stats.get('orders_enriched', 0)}")
+    logger.info(f"Загружено в БД: {stats.get('db_loaded', 0)}")
     logger.info("=" * 50)
 
 
@@ -95,7 +117,7 @@ def print_stats(stats: dict) -> None:
 """
 
 
-def run_etl_pipeline(config) -> dict:
+def run_etl_pipeline(config, args) -> dict:
     stats = {
         "users_read": 0,
         "orders_read": 0,
@@ -103,6 +125,7 @@ def run_etl_pipeline(config) -> dict:
         "orders_valid": 0,
         "orders_invalid": 0,
         "orders_enriched": 0,
+        "db_loaded": 0,
     }
 
     # Шаг 1 - EXTRACT
@@ -179,20 +202,48 @@ def run_etl_pipeline(config) -> dict:
     logger.info("Шаг 5 - LOAD")
     logger.info("=" * 50)
 
-    fields = ["user_id", "name", "age", "order_id", "amount", "created_at"]
-    success = write_csv(
-        enriched_orders, config.enriched_output_file, fields, allow_empty=True
-    )
+    # Загрузка в PostgreSQL
+    if not args.skip_db:
+        try:
+            logger.info("Загрузка данных в PostgreSQL...")
 
-    if not success:
-        logger.error("Ошибка записи результата")
-        return stats
+            if test_connection():
+                create_tables_if_not_exists()
+
+                loaded = upsert_orders_enriched(enriched_orders, batch_size=1000)
+                stats["db_loaded"] = loaded
+                logger.info(f"В базу успешно загружено {loaded} заказов")
+
+                sample_orders = get_orders_after_date(config.watermark)
+                logger.info(f"Пример запроса: обнаружено {len(sample_orders)}"
+                            f"заказов после watermark")
+            else:
+                logger.warning("Подключение к базе неуспешно, пропуск загрузки в БД")
+        
+        except Exception as e:
+            logger.error(f"Неудачная попытка загрузки в БД: {e}")
+            if not args.skip_csv:
+                logger.info("Возврат к выводу в CSV")
+    else:
+        logger.info("Пропуск загрузки в БД (--skip-db flag)")
+
+    # Запись в CSV
+    if not args.skip_csv:
+        fields = ["user_id", "name", "age", "order_id", "amount", "created_at"]
+        success = write_csv(
+            enriched_orders, config.enriched_output_file, fields, allow_empty=True
+        )
+
+        if not success:
+            logger.error("Ошибка записи CSV")
+    else:
+        logger.info("Пропуск записи в CSV (--skip-csv flag)")
 
     return stats
 
 
 """
-
+Главная функция приложение
 """
 
 
@@ -215,9 +266,11 @@ def main() -> NoReturn:
     logger.info(f"Входной файл пользователей: {config.users_file}")
     logger.info(f"Входной файл заказов: {config.orders_file}")
     logger.info(f"Выходной файл: {config.enriched_output_file}")
+    logger.info(f"Загрузка в БД: {'НЕТ' if args.skip_db else 'ДА'}")
+    logger.info(f"Загрузка в CSV: {'НЕТ' if args.skip_csv else 'ДА'}")
 
     try:
-        stats = run_etl_pipeline(config)
+        stats = run_etl_pipeline(config, args)
         print_stats(stats)
 
         if stats.get("orders_enriched", 0) > 0:
@@ -235,6 +288,8 @@ def main() -> NoReturn:
     except Exception as e:
         logger.exception(f"Критическая ошибка: {e}")
         sys.exit(EXIT_FAILURE)
+    finally:
+        close_pool()
 
 
 if __name__ == "__main__":

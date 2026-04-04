@@ -89,7 +89,7 @@ def get_connection() -> Generator:
 """
 
 
-def test_connections() -> bool:
+def test_connection() -> bool:
     try:
         with get_connection() as conn:
             with conn.cursor() as cur:
