@@ -100,7 +100,7 @@ def test_connection() -> bool:
                     return True
         return False
     except OperationalError as e:
-        logger.error("Тест подключения к БД провалился: {e}")
+        logger.error(f"Тест подключения к БД провалился: {e}")
         return False
     except Exception as e:
         logger.error(f"Неожиданная ошибка во время теста подключения: {e}")
